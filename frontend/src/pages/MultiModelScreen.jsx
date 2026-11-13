@@ -120,6 +120,17 @@ export default function MultiModelScreen() {
         method: 'POST',
         body: formData
       });
+
+      // Guard against non-JSON responses (e.g. Render HTTP 504 / 502 HTML Gateway Timeout error pages)
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        const textErr = await res.text();
+        if (res.status === 504 || res.status === 502) {
+          throw new Error('Server computation timed out (HTTP ' + res.status + '). Evaluating all 76 models at once exceeded the server gateway limit. Tip: Select "Select Specific Models / Logics" to run models in batches of 5-10.');
+        }
+        throw new Error(`Server returned HTTP ${res.status}: ${textErr.slice(0, 150)}...`);
+      }
+
       const data = await res.json();
       if (res.ok && data.success) {
         setStatusMsg(`Evaluation Complete! Evaluated ${data.summary.length} model-nutrient combinations on ${datasetType === 'trained_data' ? 'Trained Data' : 'New Validation Test Data'}.`);
