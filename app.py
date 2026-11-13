@@ -981,6 +981,15 @@ def download_report(filename):
 
 @app.route('/api/models/multi-eval', methods=['POST'])
 def multi_eval_models():
+    try:
+        return _handle_multi_eval()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e), 'details': traceback.format_exc()}), 500
+
+
+def _handle_multi_eval():
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
         
@@ -1128,73 +1137,81 @@ def multi_eval_models():
     if not results:
         return jsonify({'error': 'No matching targets or predictions could be computed.'}), 400
         
-    report_dir = os.path.join(PROJECT_ROOT, "test_reports")
-    os.makedirs(report_dir, exist_ok=True)
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    filename = f"MultiModel_Evaluation_{mode_selection}_{timestamp}.xlsx"
-    filepath = os.path.join(report_dir, filename)
-    
-    writer = pd.ExcelWriter(filepath, engine='xlsxwriter')
-    workbook = writer.book
-    
-    # 1. Best Models Per Nutrient Sheet (Arranged with top accuracy per nutrient)
-    best_per_nut = []
-    seen_nuts = set()
-    for item in summary:
-        if item["nutrient"] not in seen_nuts:
-            best_per_nut.append(item)
-            seen_nuts.add(item["nutrient"])
-    if best_per_nut:
-        df_best = pd.DataFrame(best_per_nut)
-        df_best.to_excel(writer, sheet_name='Best Models Per Nutrient', index=False)
-        best_ws = writer.sheets['Best Models Per Nutrient']
-        best_hdr_fmt = workbook.add_format({'bold': True, 'bg_color': '#10b981', 'font_color': 'white'})
-        for col_idx, col_name in enumerate(df_best.columns):
-            best_ws.write(0, col_idx, col_name, best_hdr_fmt)
-            best_ws.set_column(col_idx, col_idx, 18)
+    report_url = None
+    try:
+        report_dir = os.path.join(PROJECT_ROOT, "test_reports")
+        os.makedirs(report_dir, exist_ok=True)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"MultiModel_Evaluation_{mode_selection}_{timestamp}.xlsx"
+        filepath = os.path.join(report_dir, filename)
+        
+        writer = pd.ExcelWriter(filepath, engine='xlsxwriter')
+        workbook = writer.book
+        
+        # 1. Best Models Per Nutrient Sheet (Arranged with top accuracy per nutrient)
+        best_per_nut = []
+        seen_nuts = set()
+        for item in summary:
+            if item["nutrient"] not in seen_nuts:
+                best_per_nut.append(item)
+                seen_nuts.add(item["nutrient"])
+        if best_per_nut:
+            df_best = pd.DataFrame(best_per_nut)
+            df_best.to_excel(writer, sheet_name='Best Models Per Nutrient', index=False)
+            best_ws = writer.sheets['Best Models Per Nutrient']
+            best_hdr_fmt = workbook.add_format({'bold': True, 'bg_color': '#10b981', 'font_color': 'white'})
+            for col_idx, col_name in enumerate(df_best.columns):
+                best_ws.write(0, col_idx, col_name, best_hdr_fmt)
+                best_ws.set_column(col_idx, col_idx, 18)
 
-    df_summary = pd.DataFrame(summary)
-    df_summary.to_excel(writer, sheet_name='Summary Leaderboard', index=False)
-    
-    header_fmt = workbook.add_format({'bold': True, 'bg_color': '#0284c7', 'font_color': 'white'})
-    summary_ws = writer.sheets['Summary Leaderboard']
-    for col_idx, col_name in enumerate(df_summary.columns):
-        summary_ws.write(0, col_idx, col_name, header_fmt)
-        summary_ws.set_column(col_idx, col_idx, 18)
+        df_summary = pd.DataFrame(summary)
+        df_summary.to_excel(writer, sheet_name='Summary Leaderboard', index=False)
         
-    df_res = pd.DataFrame(results)
-    df_res.to_excel(writer, sheet_name='All Predictions', index=False)
-    raw_ws = writer.sheets['All Predictions']
-    for col_idx, col_name in enumerate(df_res.columns):
-        raw_ws.write(0, col_idx, col_name, header_fmt)
-        raw_ws.set_column(col_idx, col_idx, 16)
-        
-    for nutrient in eval_targets:
-        nut_df = df_res[df_res['nutrient'] == nutrient]
-        if nut_df.empty:
-            continue
+        header_fmt = workbook.add_format({'bold': True, 'bg_color': '#0284c7', 'font_color': 'white'})
+        summary_ws = writer.sheets['Summary Leaderboard']
+        for col_idx, col_name in enumerate(df_summary.columns):
+            summary_ws.write(0, col_idx, col_name, header_fmt)
+            summary_ws.set_column(col_idx, col_idx, 18)
             
-        sheet_name = f"Graph_{nutrient.replace('/', '_').replace('%', 'pct')}"[:31]
-        nut_df.to_excel(writer, sheet_name=sheet_name, index=False)
-        graph_ws = writer.sheets[sheet_name]
-        
-        chart = workbook.add_chart({'type': 'scatter'})
-        max_r = min(len(nut_df) + 1, 300)
-        
-        chart.add_series({
-            'name': f'{nutrient} - Actual vs Predicted',
-            'categories': [sheet_name, 1, 5, max_r - 1, 5],
-            'values':     [sheet_name, 1, 6, max_r - 1, 6],
-            'marker':     {'type': 'circle', 'size': 5},
-            'trendline':  {'type': 'linear', 'name': 'Ideal Trend'}
-        })
-        chart.set_title({'name': f'{nutrient}: Actual vs Predicted Comparison'})
-        chart.set_x_axis({'name': 'Actual Value (Laboratory)'})
-        chart.set_y_axis({'name': 'Predicted Value'})
-        chart.set_size({'width': 750, 'height': 450})
-        graph_ws.insert_chart('L2', chart)
-        
-    writer.close()
+        df_res = pd.DataFrame(results)
+        df_res.to_excel(writer, sheet_name='All Predictions', index=False)
+        raw_ws = writer.sheets['All Predictions']
+        for col_idx, col_name in enumerate(df_res.columns):
+            raw_ws.write(0, col_idx, col_name, header_fmt)
+            raw_ws.set_column(col_idx, col_idx, 16)
+            
+        for nutrient in eval_targets:
+            nut_df = df_res[df_res['nutrient'] == nutrient]
+            if nut_df.empty:
+                continue
+                
+            sheet_name = f"Graph_{nutrient.replace('/', '_').replace('%', 'pct')}"[:31]
+            nut_df.to_excel(writer, sheet_name=sheet_name, index=False)
+            graph_ws = writer.sheets[sheet_name]
+            
+            chart = workbook.add_chart({'type': 'scatter'})
+            max_r = min(len(nut_df) + 1, 300)
+            
+            chart.add_series({
+                'name': f'{nutrient} - Actual vs Predicted',
+                'categories': [sheet_name, 1, 5, max_r - 1, 5],
+                'values':     [sheet_name, 1, 6, max_r - 1, 6],
+                'marker':     {'type': 'circle', 'size': 5},
+                'trendline':  {'type': 'linear', 'name': 'Ideal Trend'}
+            })
+            chart.set_title({'name': f'{nutrient}: Actual vs Predicted Comparison'})
+            chart.set_x_axis({'name': 'Actual Value (Laboratory)'})
+            chart.set_y_axis({'name': 'Predicted Value'})
+            chart.set_size({'width': 750, 'height': 450})
+            graph_ws.insert_chart('L2', chart)
+            
+        writer.close()
+        report_url = f"/api/download/report/{filename}"
+    except Exception as report_err:
+        import traceback
+        print(f"[Warning] Excel report generation skipped or failed: {report_err}")
+        traceback.print_exc()
+        report_url = None
     
     # Build lightweight chart_data mapping: { "METHOD_ID::NUTRIENT": [ {x, y, sample_id, acc, passed} ] }
     chart_series_map = {}
@@ -1224,7 +1241,7 @@ def multi_eval_models():
         "chart_series_map": chart_series_map,
         "results": results[:500],
         "total_results_count": len(results),
-        "report_url": f"/api/download/report/{filename}"
+        "report_url": report_url
     })
 
 
