@@ -276,16 +276,44 @@ def extract_wavelengths(sample_data):
 
 
 def extract_actual(sample_data, target):
+    # Mapping for chemical aliases and compound formulas (e.g., P2O5 for P, K2O for K, SO4 for S)
+    TARGET_ALIASES = {
+        "p": ["p", "p2o5", "p₂o₅", "phosphate", "phosphorus", "phosphorous"],
+        "k": ["k", "k2o", "k₂o", "potash", "potassium"],
+        "s": ["s", "so4", "so₄", "sulfate", "sulphate", "sulfur", "sulphur"],
+        "oc": ["oc", "organic carbon", "organic_carbon"],
+        "n": ["n", "nitrogen"],
+        "ca": ["ca", "calcium"],
+        "mg": ["mg", "magnesium"],
+        "fe": ["fe", "iron"],
+        "mn": ["mn", "manganese"],
+        "cu": ["cu", "copper"],
+        "zn": ["zn", "zinc"],
+        "b": ["b", "boron"]
+    }
+
+    t = str(target).strip().lower()
+    aliases = TARGET_ALIASES.get(t, [t])
+
     for key in sample_data.keys():
         k = str(key).strip().lower()
-        t = str(target).strip().lower()
-        if k == t or k.startswith(t + "%") or k.startswith(t + " ") or k.startswith(t + "_") or k.startswith(t + "("):
-            val = sample_data.get(key)
-            if val is not None and str(val).strip() not in ("", "nan", "NaN", "None"):
-                try:
-                    return float(val)
-                except (TypeError, ValueError):
-                    pass
+        # Check direct or prefix matches against target or its aliases
+        for alias in aliases:
+            if (
+                k == alias
+                or k.startswith(alias + "%")
+                or k.startswith(alias + " ")
+                or k.startswith(alias + "_")
+                or k.startswith(alias + "(")
+                or k.startswith(alias + "/")
+                or k.startswith(alias + "-")
+            ):
+                val = sample_data.get(key)
+                if val is not None and str(val).strip() not in ("", "nan", "NaN", "None"):
+                    try:
+                        return float(val)
+                    except (TypeError, ValueError):
+                        pass
     return None
 
 
