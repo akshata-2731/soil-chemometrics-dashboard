@@ -95,9 +95,34 @@ export default function MultiModelScreen() {
     }
   };
 
+  const handleQuickSelectChampions = () => {
+    const championIds = ['B01_PLSR', 'B07_3D_SVR', 'B09_BayesianRidge', 'B28_BoundaryBuffer', 'B24_Heterogeneous_TwoStage', 'B26_BalancedTertiles'];
+    const selected = allModels
+      .filter(m => championIds.includes(m.id))
+      .map(m => ({ id: m.id, type: 'ml', name: m.name }));
+    setSelectedCustomMethods(selected);
+  };
+
+  const handleSelectAllML = () => {
+    setSelectedCustomMethods(allModels.map(m => ({ id: m.id, type: 'ml', name: m.name })));
+  };
+
+  const handleSelectAllLogics = () => {
+    setSelectedCustomMethods(allLogics.map(l => ({ id: l.id, type: 'logic', name: l.name || l.id })));
+  };
+
+  const handleClearSelection = () => {
+    setSelectedCustomMethods([]);
+  };
+
   const handleRunEvaluation = async () => {
     if (!file) {
       alert('Please upload an Excel file containing soil samples (.xlsx)');
+      return;
+    }
+
+    if (evalMode === 'custom' && selectedCustomMethods.length === 0) {
+      alert('Please select at least 1 Model or Mathematical Logic from the selection box below (or click "✨ Fast Champions").');
       return;
     }
 
@@ -540,7 +565,14 @@ export default function MultiModelScreen() {
               boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)'
             }}
           >
-            {running ? '⏳ Evaluating All Models...' : '🚀 Execute All Models / Logics Once'}
+            {running
+              ? '⏳ Evaluating Chemometrics...'
+              : evalMode === 'custom'
+                ? `🎯 Execute Selected Methods (${selectedCustomMethods.length})`
+                : evalMode === 'all_logic'
+                  ? '📐 Execute All 51 Mathematical Logics'
+                  : '⚡ Execute All 76 ML Models'
+            }
           </button>
         </div>
 
@@ -556,9 +588,66 @@ export default function MultiModelScreen() {
           marginBottom: 24,
           boxShadow: colors.cardShadow
         }}>
-          <h4 style={{ fontSize: 15, fontWeight: 700, color: colors.textPrimary, margin: '0 0 12px 0' }}>
-            Select Individual Models or Mathematical Logics:
-          </h4>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
+            <div>
+              <h4 style={{ fontSize: 15, fontWeight: 700, color: colors.textPrimary, margin: '0 0 4px 0' }}>
+                Select Specific Models / Logics to Benchmark:
+              </h4>
+              <span style={{ fontSize: 12, color: colors.textSecondary }}>
+                Selected: <strong style={{ color: '#0284c7' }}>{selectedCustomMethods.length}</strong> items (Running in batches of 4–10 prevents gateway timeouts)
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={handleQuickSelectChampions}
+                style={{
+                  background: '#0284c7',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  padding: '6px 12px',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                ✨ Select Top 6 Fast Champions
+              </button>
+              <button
+                type="button"
+                onClick={handleSelectAllML}
+                style={{
+                  background: colors.bg,
+                  color: colors.textPrimary,
+                  border: `1px solid ${colors.cardBorder}`,
+                  borderRadius: 6,
+                  padding: '6px 12px',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                All ML ({allModels.length})
+              </button>
+              <button
+                type="button"
+                onClick={handleClearSelection}
+                style={{
+                  background: 'transparent',
+                  color: '#ef4444',
+                  border: '1px solid #ef4444',
+                  borderRadius: 6,
+                  padding: '6px 12px',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8, maxHeight: 220, overflowY: 'auto', padding: 4 }}>
             {allModels.map(m => {
               const sel = selectedCustomMethods.some(x => x.id === m.id);

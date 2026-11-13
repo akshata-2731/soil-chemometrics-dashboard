@@ -42,6 +42,15 @@ def _research_guard():
     if RESEARCH_MODE and (request.method, request.path.rstrip("/")) in BLOCKED_IN_RESEARCH:
         return jsonify({"error": "This action is disabled in the Scispectrum research edition."}), 403
 
+
+@app.route("/api/version")
+def get_version():
+    return jsonify({
+        "status": "online",
+        "version": "1.2.0-champion-batching",
+        "timestamp": time.time()
+    })
+
 LOGICS_DEF_DIR   = PROJECT_ROOT / "logics" / "definitions"
 LOGICS_IMPL_DIR  = PROJECT_ROOT / "logics" / "implementations"
 CALIBRATION_DIR  = PROJECT_ROOT / "calibration"
