@@ -1,0 +1,65 @@
+const plugins = [
+  {
+    id: 1,
+    name: 'Standard Euclidean + IDW',
+    code: 'M1',
+    targetNutrient: 'OC',
+    targetNutrients: ['OC'],
+    desc: 'Euclidean distance across spectrum with Inverse Distance Weighting (IDW p=1.0)',
+    formula: 'd_i = √(Σ(S - C_i)²), w_i = 1/(d_i + ε), Pred = Σ(w_i × V_i) / Σw_i',
+    builtin: true,
+    active: true,
+    fn: function(d, s) {
+      const dm = Math.sqrt(d.min.reduce((a, v, i) => a + Math.pow(s[i] - v, 2), 0));
+      const dd = Math.sqrt(d.mid.reduce((a, v, i) => a + Math.pow(s[i] - v, 2), 0));
+      const dx = Math.sqrt(d.max.reduce((a, v, i) => a + Math.pow(s[i] - v, 2), 0));
+      const eps = 1e-10;
+      const wm = 1 / (dm + eps), wd = 1 / (dd + eps), wx = 1 / (dx + eps);
+      return (wm * d.vals[0] + wd * d.vals[1] + wx * d.vals[2]) / (wm + wd + wx);
+    }
+  },
+  {
+    id: 2,
+    name: 'Fingerprint Tanh + Manhattan',
+    code: 'M2',
+    targetNutrient: 'N',
+    targetNutrients: ['N'],
+    desc: 'Scale-normalized tanh transformation with Manhattan distance and IDW (p=2.0)',
+    formula: 'T(x)=tanh(x/max|s|), d=Σ|T(S)-T(C)|, w=1/(d+ε)², Pred=Σ(w×V)/Σw',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      const scaleS = Math.max(...s.map(Math.abs)) + 1e-10;
+      const scaleMin = Math.max(...d.min.map(Math.abs)) + 1e-10;
+      const scaleMid = Math.max(...d.mid.map(Math.abs)) + 1e-10;
+      const scaleMax = Math.max(...d.max.map(Math.abs)) + 1e-10;
+      
+      const tS = s.map(x => Math.tanh(x / scaleS));
+      const tMin = d.min.map(x => Math.tanh(x / scaleMin));
+      const tMid = d.mid.map(x => Math.tanh(x / scaleMid));
+      const tMax = d.max.map(x => Math.tanh(x / scaleMax));
+      
+      const dm = tS.reduce((a, v, i) => a + Math.abs(v - tMin[i]), 0);
+      const dd = tS.reduce((a, v, i) => a + Math.abs(v - tMid[i]), 0);
+      const dx = tS.reduce((a, v, i) => a + Math.abs(v - tMax[i]), 0);
+      
+      const eps = 1e-10;
+      const wm = 1 / Math.pow(dm + eps, 2);
+      const wd = 1 / Math.pow(dd + eps, 2);
+      const wx = 1 / Math.pow(dx + eps, 2);
+      return (wm * d.vals[0] + wd * d.vals[1] + wx * d.vals[2]) / (wm + wd + wx);
+    }
+  },
+  {
+    id: 3,
+    name: 'KNN Ratio Fusion',
+    code: 'M3',
+    targetNutrient: 'P',
+    targetNutrients: ['P'],
+    desc: 'Pairwise adjacent band ratios (i+1, i+2) with mean ratio Manhattan distance & IDW (p=2.0)',
+    formula: 'Ratio=S[i]/S[j], d=|Ratio_S - Ratio_C|, w=1/(d+ε)², Pred=Σ(w×V)/Σw',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      function getAvgRatio(vec) {
+        const ratios = [];

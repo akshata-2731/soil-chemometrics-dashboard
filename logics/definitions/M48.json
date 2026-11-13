@@ -1,0 +1,16 @@
+{
+    "id": "M48",
+    "name": "Custom IP Euclidean Distance",
+    "type": "Mathematical",
+    "target": "All 12 Nutrients",
+    "features": "A-H, R, I-L, U-W, S-T",
+    "required_ips": [
+        "ip1",
+        "ip2",
+        "ip3"
+    ],
+    "calibration_required": true,
+    "calibration_source": "calibration.json [target]",
+    "verification_status": "VERIFIED",
+    "formula": "IP1/2/3 computed via sum(W^2)/sum(W)/100. Weights = 1/d^2 Euclidean distance."
+}

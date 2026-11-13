@@ -1,0 +1,14 @@
+{
+  "OC": {"type": "ml", "id": "OC_model.pkl"},
+  "N": {"type": "ml", "id": "N_model.pkl"},
+  "P": {"type": "ml", "id": "P_model.pkl"},
+  "K": {"type": "ml", "id": "K_model.pkl"},
+  "Ca": {"type": "ml", "id": "Ca_model.pkl"},
+  "Mg": {"type": "ml", "id": "Mg_model.pkl"},
+  "S": {"type": "ml", "id": "S_model.pkl"},
+  "Fe": {"type": "ml", "id": "Fe_model.pkl"},
+  "Mn": {"type": "ml", "id": "Mn_model.pkl"},
+  "Cu": {"type": "ml", "id": "Cu_model.pkl"},
+  "Zn": {"type": "ml", "id": "Zn_model.pkl"},
+  "B": {"type": "ml", "id": "B_model.pkl"}
+}

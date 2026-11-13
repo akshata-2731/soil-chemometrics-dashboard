@@ -1,0 +1,50 @@
+{
+  "B": {
+    "method_id": "B_model.pkl",
+    "method_type": "ml"
+  },
+  "Ca": {
+    "method_id": "Ca_model.pkl",
+    "method_type": "ml"
+  },
+  "Cu": {
+    "method_id": "Cu_model.pkl",
+    "method_type": "ml"
+  },
+  "Fe": {
+    "method_id": "Fe_model.pkl",
+    "method_type": "ml"
+  },
+  "K": {
+    "method_id": "K_model.pkl",
+    "method_type": "ml"
+  },
+  "Mg": {
+    "method_id": "Mg_model.pkl",
+    "method_type": "ml"
+  },
+  "Mn": {
+    "method_id": "Mn_model.pkl",
+    "method_type": "ml"
+  },
+  "N": {
+    "method_id": "N_model.pkl",
+    "method_type": "ml"
+  },
+  "OC": {
+    "method_id": "M26",
+    "method_type": "logic"
+  },
+  "P": {
+    "method_id": "M3",
+    "method_type": "logic"
+  },
+  "S": {
+    "method_id": "S_model.pkl",
+    "method_type": "ml"
+  },
+  "Zn": {
+    "method_id": "Zn_model.pkl",
+    "method_type": "ml"
+  }
+}

@@ -1,0 +1,96 @@
+| Logic ID | Logic Name | Target | Formula Match | Numerical Match | Boundary Match | Calibration Match | Status |
+|---|---|---|---|---|---|---|---|
+| FP | Fingerprint + Transform | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I1 | Spectral Index I1 | All | YES | YES | YES | YES | VERIFIED |
+| I10 | Spectral Index I10 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I11 | Spectral Index I11 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I12 | Spectral Index I12 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I13 | Spectral Index I13 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I14 | Spectral Index I14 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I15 | Spectral Index I15 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I16 | Spectral Index I16 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I17 | Spectral Index I17 | All | YES | YES | YES | YES | VERIFIED |
+| I18 | Spectral Index I18 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I19 | Spectral Index I19 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I2 | Spectral Index I2 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I20 | Spectral Index I20 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I21 | Spectral Index I21 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I22 | Spectral Index I22 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I23 | Spectral Index I23 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I24 | Spectral Index I24 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I25 | Spectral Index I25 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I26 | Spectral Index I26 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I27 | Spectral Index I27 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I28 | Spectral Index I28 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I29 | Spectral Index I29 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I3 | Spectral Index I3 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I30 | Spectral Index I30 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I31 | Spectral Index I31 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I32 | Spectral Index I32 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I33 | Spectral Index I33 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I34 | Spectral Index I34 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I35 | Spectral Index I35 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I36 | Spectral Index I36 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I37 | Spectral Index I37 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I38 | Spectral Index I38 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I39 | Spectral Index I39 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I4 | Spectral Index I4 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I40 | Spectral Index I40 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I41 | Spectral Index I41 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I42 | Spectral Index I42 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I43 | Spectral Index I43 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I44 | Spectral Index I44 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I45 | Spectral Index I45 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I46 | Spectral Index I46 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I47 | Spectral Index I47 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I48 | Spectral Index I48 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I49 | Spectral Index I49 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I5 | Spectral Index I5 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I50 | Spectral Index I50 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I6 | Spectral Index I6 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I7 | Spectral Index I7 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I8 | Spectral Index I8 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| I9 | Spectral Index I9 | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| L1 | Mid-Anchor Relative Dev | All | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| L2 | Mid-Anchor Logarithmic | All | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| L3 | Channel Normalization | All | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| L4 | Sensitivity Weighted | All | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| L5 | Matrix Correction | All | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| L6 | Residual Method | All | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| L7 | Position Engine | All | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M1 | Standard Euclidean + IDW | ['OC'] | YES | YES | YES | YES | VERIFIED |
+| M10 | Dense Ladder | ['Fe'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M11 | Carbon Response Index | ['Mn'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M12 | Spectral Energy | ['Cu'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M13 | Projection Vector | ['Zn'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M14 | Spectral Angle | ['B'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M15 | Spectral Gradient | ['OC'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M16 | Dynamic Ratio | ['OC'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M17 | Multi Ratio Sulphur | ['S'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M18 | Spectral Centroid | ['Fe'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M19 | Spectral Curvature | ['Mn'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M2 | Fingerprint Tanh + Manhattan | ['N'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M20 | Gain Corrected | ['Cu'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M22 | Blended Regression | ['K'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M23 | Fingerprint Transform | ['Mg'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M24 | Piecewise Interpolation | ['Zn'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M25 | Similarity Weighted Interpolation | ['N', 'OC'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M3 | KNN Ratio Fusion | ['P'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M4 | Spectral Nutrient Index | ['K'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M5 | Spectral Voting Engine | ['K'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M6 | Unified Adaptive | ['Ca'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M7 | Adaptive Projection | ['Ca'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M8 | Weighted Projection | ['Mg'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| M9 | 10-Step Advanced | ['S'] | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| MD | Mahalanobis Distance | All | YES | YES | YES | YES | VERIFIED |
+| SAM_SRI | SAM + SRI classification/calculation | All | YES | YES | YES | YES | VERIFIED |
+| SGSV | SG/SV Logic | All | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| SPEC1 | DCT | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| SPEC2 | DCT Modified | All | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| SPEC3 | DWT | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+| SPEC4 | DWT Modified | All | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE | INCOMPLETE |
+| SPEC5 | FFT | All | YES | YES | INCOMPLETE | YES | INCOMPLETE |
+
+**Total VERIFIED:** 5
+**Total MISMATCH:** 0
+**Total INCOMPLETE:** 85

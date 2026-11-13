@@ -1,0 +1,465 @@
+
+[MATCH] Line 3750: LOGIC - Using Fingerprint + Transformation Method  
+    
+   1. N (NITROGEN) PREDICTION  
+   Calibration Standards  
+   Position  N Value (kg/ha)  
+   0 50 
+   0.375  350 
+   1 850 
+   Position - Value Mapping  
+   text 
+   Position:    0 ────────── 0.375 ────────────────── 1  
+                 ↓              ↓                      ↓  
+   Value:       50            350                    850  
+                 ↓              ↓                      ↓  
+   Range:       0             300                    500  
+                 ↓              ↓                      ↓  
+                 │◄─── 0.375 ──►│◄──────  0.625 ──────►│ 
+                 │              │                      │  
+                 │◄─── 300 ────►│◄──────  500 ──────── ►│ 
+   Formula  
+   text 
+   If Position ≤ 0.375:  
+       N = 50 + (Position / 0.375) × 300  
+    
+   If Position > 0.375:  
+       N = 350 + ((Position - 0.375) / 0.625) × 500  
+    
+   2. P (PHOSPHORUS) PREDICTION  
+   Calibration Standards  
+   Position  P Value (kg/ha)  
+
+[MATCH] Line 4177: LOGIC 1: MID -ANCHOR RELATIVE DEVIATION METHOD  
+   COMPLETE CALCULATION FOR ORGANIC CARBON (OC)  
+    
+   INPUT DATA - Sample BR -7 (Sample Index 21)  
+   Spectral Data (21 features):  
+   1159.21, 208.78, 998.73, 281.32, 468.92, 923.83, 386.57, 469.43, 338.56, 94.0, 41.0, 15.0, 
+   572.86, 183.57, 68.98, 46.0, 110.09, 356.73, 86.629, 3.611, 2.644  
+   Actual OC Value = 0.27  
+    
+   LOGIC 1 FORMULA  
+   text 
+   Step 1: Extract selected bands for OC: [6, 7, 18, 19, 20]  
+   Step 2: Get blank spectrum (oc_blank)  
+   Step 3: Correct sample and MID by blank:  
+           sample_corr = sample_bands / (blank_bands  + ε) 
+           mid_corr = mid_bands / (blank_bands + ε) 
+   Step 4: Calculate ratios = sample_corr / (mid_corr + ε) 
+   Step 5: Score = Σ(weights × ratios)  
+   Step 6: Scale = (max_val - min_val) / 2  
+   Step 7: Prediction = mid_val + scale × (score - 1) 
+   Step 8: Clamp to [min_val, max_val]  
+    
+   OC CONFIGURATION  
+   Parameter  Value  
+   bands  [6, 7, 18, 19, 20]  
+   vals (min, mid, max)  [0.1, 1.0, 2.0]  
+   weights  [0.2, 0.2, 0.2, 0.2, 0.2]  
+   blank_key  "oc_blank"  
+    
+   Calibration Data for OC (From Previous Dataset)  
+
+[MATCH] Line 4304: LOGIC 2: MID -ANCHOR LOGARITHMIC METHOD  
+   COMPLETE CALCULATION FOR PHOSPHORUS (P) - USING PREVIOUS CALIBRATION  
+    
+   INPUT DATA - Sample BR -7 (Sample Index 21)  
+   Spectral Data (21 features):  
+   1159.21, 208.78, 998.73, 281.32, 468.92, 923.83, 386.57, 469.43, 338.56, 94.0, 41.0, 15.0, 
+   572.86, 183.57, 68.98, 46.0, 110.09, 356.73, 86.629, 3.611, 2.644  
+   Actual P Value = 142.85  
+    
+   LOGIC 2 FORMULA  
+   text 
+   Step 1: Extract selected bands for P: [0, 4, 5, 14]  
+   Step 2: Get blank spectrum (p_blank)  
+   Step 3: Correct sample and MID by blank:  
+           sample_corr = sample_bands / (blank_bands + ε) 
+           mid_corr = mid_bands / (blank_bands + ε) 
+   Step 4: Calculate log ratios = log(sample_corr / (mid_corr + ε) + ε)  
+   Step 5: Score = Σ(weights × log_ratios)  
+   Step 6: Scale = (max_val - min_val) / 2  
+   Step 7: Prediction = mid_val + scale × score  
+   Step 8: Clamp to [min_val, max_val]  
+    
+   P CONFIGURATION  
+   Parameter  Value  
+   bands  [0, 4, 5, 14]  
+   vals (min, mid, max)  [0.916, 170, 366.4]  
+   weights  [0.25, 0.25, 0.25, 0.25]  
+   blank_key  "p_blank"  
+    
+   Calibration Data for P (From Previous Dataset)  
+
+[MATCH] Line 4422: LOGIC 3: CHANNEL NORMALIZATION METHOD  
+   COMPLETE CALCULATION FOR CALCIUM (Ca) - WITHOUT BLANK  
+    
+   INPUT DATA - Sample BR -7 (Sample Index 21)  
+   Spectral Data (21 features):  
+   1159.21, 208.78, 998.73, 281.32, 468.92, 923.83, 386.57, 469.43, 338.56, 94.0, 41.0, 15.0, 
+   572.86, 183.57, 68.98, 46.0, 110.09, 356.73, 86.629, 3.611, 2.644  
+   Actual Ca Value = 9.85635  
+    
+   LOGIC 3 FORMULA (Without Blank)  
+   text 
+   Step 1: Extract selected bands for Ca: [3, 12, 16, 18]  
+   Step 2: Normalize sample, MIN, MID, MAX by sum:  
+           sample_norm = sample_bands / sum(sample_bands)  
+           min_norm = min_bands / sum(min_bands)  
+           mid_norm = mid_bands / sum(mid_bands)  
+           max_norm = max_bands / sum( max_bands)  
+   Step 3: Calculate Euclidean distances:  
+           d_min = ||sample_norm - min_norm||  
+           d_mid = ||sample_norm - mid_norm||  
+           d_max = ||sample_norm - max_norm||  
+   Step 4: IDW weights:  
+           w_i = 1/(d_i + ε) 
+           weights = w / sum(w)  
+   Step 5: Prediction = weights[0]×min_val + weights[1]×mid_val + weights[2]×max_val  
+   Step 6: Clamp to [min_val, max_val]  
+    
+   Ca CONFIGURATION  
+   Parameter  Value  
+   bands  [3, 12, 16, 18]  
+
+[MATCH] Line 4590: LOGIC 4: SENSITIVITY WEIGHTED METHOD  
+   COMPLETE CALCULATION FOR MAGNESIUM (Mg) - WITHOUT BLANK  
+    
+   INPUT DATA - Sample BR -7 (Sample Index 21)  
+   Spectral Data (21 features):  
+   1159.21, 208.78, 998.73, 281.32, 468.92, 923.83, 386.57, 469.43, 338.56, 94.0, 41.0, 15.0, 
+   572.86, 183.57, 68.98, 46.0, 110.09, 356.73, 86.629, 3.611, 2.644  
+   Actual Mg Value = 5.29432  
+    
+   LOGIC 4 FORMULA (Without Blank)  
+   text 
+   Step 1: Extract selected bands for Mg: [1, 3, 6, 12]  
+   Step 2: Calculate sensitivity = (max_bands - min_bands) / (mid_bands + ε) 
+   Step 3: Calculate ratios = sample_bands / (mid_bands + ε) 
+   Step 4: Score = Σ(sensitivity × ratios) / Σ(sensitivity)  
+   Step 5: Scale = (max_val - min_val) / 2  
+   Step 6: Prediction = mid_val + scale × (score - 1) 
+   Step 7: Clamp to [min_val, max_val]  
+    
+   Mg CONFIGURATION  
+   Parameter  Value  
+   bands  [1, 3, 6, 12]  
+   vals (min, mid, max)  [1, 30, 60]  
+    
+   Calibration Data for Mg (From Previous Dataset)  
+   Type  Mg 
+   Value  Spectrum (21 features)  
+   MIN  1.2084  1869.31, 439.88, 1608.14, 494.59, 706.97, 1160.62, 545.98, 607.1, 405.16, 111, 45.01, 19, 
+   697.26, 209.56, 75.14, 51.01, 126, 388.98, 556.899372, 9.015084, 7.350666  
+   MID  6.81086  1020.32, 211.94, 956.79, 288, 493.17, 919.26, 398.38, 479.16, 345.54, 95, 40.15, 15, 
+
+[MATCH] Line 4711: LOGIC 5: MATRIX CORRECTION METHOD  
+   COMPLETE CALCULATION FOR SULPHUR (S)  
+    
+   INPUT DATA - Sample BR -7 (Sample Index 21)  
+   Spectral Data (21 features):  
+   1159.21, 208.78, 998.73, 281.32, 468.92, 923.83, 386.57, 469.43, 338.56, 94.0, 41.0, 15.0, 
+   572.86, 183.57, 68.98, 46.0, 110.09, 356.73, 86.629, 3.611, 2.644  
+   Actual S Value = 1.63  
+    
+   LOGIC 5 FORMULA (Without Blank)  
+   text 
+   Step 1: Extract selected bands for S: [0, 1, 17, 18]  
+   Step 2: Extract matrix bands for S: [0, 1, 17]  
+   Step 3: Calculate background correction:  
+           sample_bg = mean(sample_matrix)  
+           mid_bg = mean(mid_matrix)  
+   Step 4: Correct sample and MID:  
+           sample_corr = sample_bands / sample_bg  
+           mid_corr = mid_bands / mid_bg  
+           min_corr = min_bands / mid_bg  
+           max_corr = max_bands / mid_bg  
+   Step 5: Calculate Euclidean distances:  
+           d_min = ||sample_corr - min_corr||  
+           d_mid = ||sample_corr - mid_corr||  
+           d_max = ||sample_corr - max_corr||  
+   Step 6: IDW weights:  
+           w_i = 1/(d_i + ε) 
+           weights = w / sum(w)  
+   Step 7: Prediction = weights[0]×min_val + weights[1]×mid_val + weights[2]×max_val  
+   Step 8: Clamp to [min_val, max_val]  
+
+[MATCH] Line 4919: LOGIC 6: RESIDUAL METHOD  
+   COMPLETE CALCULATION FOR ZINC (Zn) - WITHOUT BLANK  
+    
+   INPUT DATA - Sample BR -7 (Sample Index 21)  
+   Spectral Data (21 features):  
+   1159.21, 208.78, 998.73, 281.32, 468.92, 923.83, 386.57, 469.43, 338.56, 94.0, 41.0, 15.0, 
+   572.86, 183.57, 68.98, 46.0, 110.09, 356.73, 86.629, 3.611, 2.644  
+   Actual Zn Value = 1.04  
+    
+   LOGIC 6 FORMULA (Without Blank)  
+   text 
+   Step 1: Extract selected bands for Zn: [5, 10, 14, 18]  
+   Step 2: Get sample and MID corrected values (no blank)  
+   Step 3: Use first and last selected bands for regression:  
+           x = sample_corr[0], y = sample_corr[ -1] 
+           x_mid = mid_corr[0], y_mid = mid_corr[ -1] 
+   Step 4: Calculate slope: a = y_mid / (x_mid + ε) 
+   Step 5: Expected = a × sample_corr[0]  
+   Step 6: Residual = sample_corr[ -1] - Expected  
+   Step 7: Scale = (max_val - min_val) / 10  
+   Step 8: Prediction = mid_val + scale × residual  
+   Step 9: Clamp to [min_val, max_val]  
+    
+   Zn CONFIGURATION  
+   Parameter  Value  
+   bands  [5, 10, 14, 18]  
+   vals (min, mid, max)  [0.1, 5, 10]  
+    
+   Calibration Data for Zn (From Previous Dataset)  
+   Type  Zn 
+
+[MATCH] Line 5024: LOGIC 7: POSITION ENGINE  
+   COMPLETE CALCULATION FOR PHOSPHORUS (P) - WITHOUT BLANK  
+    
+   INPUT DATA - Sample BR -7 (Sample Index 21)  
+   Spectral Data (21 features):  
+   1159.21, 208.78, 998.73, 281.32, 468.92, 923.83, 386.57, 469.43, 338.56, 94.0, 41.0, 15.0, 
+   572.86, 183.57, 68.98, 46.0, 110.09, 356.73, 86.629, 3.611, 2.644  
+   Actual P Value = 142.85  
+    
+   LOGIC 7 FORMULA (Without Blank)  
+   text 
+   Step 1: Extract selected bands for P: [0, 4, 5, 14]  
+   Step 2: Get sample, MIN, MAX bands (no blank)  
+   Step 3: Calculate position for each band:  
+           pos_i = (sample[i] - min[i]) / (max[i] - min[i])  
+   Step 4: Clamp each position to [0, 1]  
+   Step 5: Calculate weighted position:  
+           position = Σ(weights × pos_i)  
+   Step 6: Prediction = min_val + position × (max_val - min_val)  
+   Step 7: Clamp to [min_val, max_val]  
+    
+   P CONFIGURATION  
+   Parameter  Value  
+   bands  [0, 4, 5, 14]  
+   vals (min, mid, max)  [0.916, 170, 366.4]  
+   weights  [0.25, 0.25, 0.25, 0.25]  
+    
+   Calibration Data for P (From Previous Dataset)  
+   Type  P 
+   Value  Spectrum (21 features)  
+
+[MATCH] Line 5123: LOGIC 1: DCT (Discrete Cosine Transform)  
+   COMPLETE CALCULATION FOR NITROGEN (N)  
+    
+   INPUT DATA - Sample BR -7 (Sample Index 21)  
+   Spectral Data (21 features):  
+   1159.21, 208.78, 998.73, 281.32, 468.92, 923.83, 386.57, 469.43, 338.56, 94.0, 41.0, 15.0, 
+   572.86, 183.57, 68.98, 46.0, 110.09, 356.73, 86.629, 3.611, 2.644  
+   Actual N Value = 50.4  
+    
+   LOGIC 1 FORMULA  
+   text 
+   Step 1: Preprocess spectrum (SNV + 1st Derivative + 2nd Derivative)  
+   Step 2: Apply DCT (Discrete Cosine Transform)  
+           DCT(k) = Σ(x[n] × cos( π×k×(2n+1)/(2N)))  
+   Step 3: Take first 15 coefficients  
+   Step 4: Normalize by first coefficient  
+   Step 5: Use as features for KNN prediction  
+    
+   CALIBRATION DATA FOR NITROGEN  
+   Sample  Sample 
+   No. N 
+   Value  Spectrum (21 features)  
+   21 
+   (idx)  Sample 
+   22 50.4  1158.5, 236.86, 1101.22, 317.04, 515.5, 984.7, 422.05, 499.88, 357.4, 
+   100, 42.98, 16, 616.93, 199, 72.19, 48.01, 116.98, 382.03, 94.229444, 
+   3.956748, 2.852158  
+   16 
+   (idx)  Sample 
+   17 144 1123.67, 221.99, 1045.29, 304.82, 505.52, 967.28, 416.99, 495, 
+
+[MATCH] Line 5369: LOGIC 2: DCT MODIFIED  
+   COMPLETE CALCULATION FOR PHOSPHORUS (P)  
+    
+   INPUT DATA - Sample BR -7 (Sample Index 21)  
+   Spectral Data (21 features):  
+   1159.21, 208.78, 998.73, 281.32, 468.92, 923.83, 386.57, 469.43, 338.56, 94.0, 41.0, 15.0, 
+   572.86, 183.57, 68.98, 46.0, 110.09, 356.73, 86.629, 3.611, 2.644  
+   Actual P Value = 142.85  
+    
+   LOGIC 2 FORMULA  
+   text 
+   Step 1: Preprocess spectrum (SNV + 1st Derivative + 2nd Derivative)  
+   Step 2: Apply DCT (Discrete Cosine Transform)  
+   Step 3: Take first 12 coefficients and normalize by first coefficient  
+   Step 4: Calculate statistical features (energy, mean, std, max, min, sqrt energy)  
+   Step 5: Concatenate all features  
+   Step 6: Normalize by max absolute value  
+   Step 7: Use as features for KNN prediction  
+    
+   CALIBRATION DATA FOR PHOSPHORUS  
+   Sample 
+   Index  Sample 
+   No. P 
+   Value  Spectrum (21 features)  
+   16 Sample 
+   17 2.00  1123.67, 221.99, 1045.29, 304.82, 505.52, 967.28, 416.99, 495, 
+   354.42, 99, 42, 16, 612.69, 197.88, 72.02, 48, 116.01, 380.69, 
+   72.699244, 3.772172, 2.700178  
+   3 Sample 
+   4 702.06  1696.39, 403.99, 1482.05, 467.99, 748.49, 1112.46, 534.35, 597.74, 
+
+[MATCH] Line 5652: LOGIC 3: DWT (Discrete Wavelet Transform)  
+   COMPLETE CALCULATION FOR POTASSIUM (K)  
+    
+   INPUT DATA - Sample BR -7 (Sample Index 21)  
+   Spectral Data (21 features):  
+   1159.21, 208.78, 998.73, 281.32, 468.92, 923.83, 386.57, 469.43, 338.56, 94.0, 41.0, 15.0, 
+   572.86, 183.57, 68.98, 46.0, 110.09, 356.73, 86.629, 3.611, 2.644  
+   Actual K Value = 364.74  
+    
+   LOGIC 3 FORMULA  
+   text 
+   Step 1: Preprocess spectrum (SNV + 1st Derivative + 2nd Derivative)  
+   Step 2: Apply DWT (Discrete Wavelet Transform) with 'db4' wavelet, level=3  
+   Step 3: Extract approximation coefficients (first 6)  
+   Step 4: Extract statistical features from detail coefficients  
+   Step 5: Pad to 15 features  
+   Step 6: Normalize by max absolute value  
+   Step 7: Use as features for KNN prediction  
+    
+   CALIBRATION DATA FOR POTASSIUM  
+   Sample 
+   Index  Sample 
+   No. K Value  Spectrum (21 features)  
+   16 Sample 
+   17 82 1123.67, 221.99, 1045.29, 304.82, 505.52, 967.28, 416.99, 495, 
+   354.42, 99, 42, 16, 612.69, 197.88, 72.02, 48, 116.01, 380.69, 
+   72.699244, 3.772172, 2.700178  
+   3 Sample 
+   4 1359.08  1696.39, 403.99, 1482.05, 467.99, 748.49, 1112.46, 534.35, 
+   597.74, 400.65, 109, 44, 19, 688.41, 207.7, 78.02, 52, 123.99, 
+
+[MATCH] Line 5903: LOGIC 4: DWT MODIFIED  
+   COMPLETE CALCULATION FOR CALCIUM (Ca)  
+    
+   INPUT DATA - Sample BR -7 (Sample Index 21)  
+   Spectral Data (21 features):  
+   1159.21, 208.78, 998.73, 281.32, 468.92, 923.83, 386.57, 469.43, 338.56, 94.0, 41.0, 15.0, 
+   572.86, 183.57, 68.98, 46.0, 110.09, 356.73, 86.629, 3.611, 2.644  
+   Actual Ca Value = 9.85635  
+    
+   LOGIC 4 FORMULA  
+   text 
+   Step 1: Preprocess spectrum (SNV + 1st Derivative + 2nd Derivative)  
+   Step 2: Apply DWT (Discrete Wavelet Transform) with 'db4' wavelet, level=4  
+   Step 3: Extract approximation coefficients (first 5) + statistics  
+   Step 4: Extract statistics from each detail level (mean, std, max, 75th, 25th percentile)  
+   Step 5: Calculate total energy  
+   Step 6: Pad to 20 features  
+   Step 7: Normalize by max absolute value  
+   Step 8: Use as features for KNN prediction  
+    
+   CALIBRATION DATA FOR CALCIUM  
+   Sample 
+   Index  Sample 
+   No. Ca Value  Spectrum (21 features)  
+   19 Sample 
+   20 9.74135  1861.48, 426.04, 1551.11, 486.63, 696.82, 1124.74, 524.96, 
+   588.01, 391.81, 107, 44, 19, 660.18, 198.08, 73, 49.75, 119.99, 
+   368.23, 598.595255, 9.2285, 7.487448  
+   10 Sample 
+   11 16.7046  1766.47, 422.09, 1528.69, 482.08, 693.9, 1118.79, 522.97, 
+
+[MATCH] Line 6193: LOGIC 5: FFT (Fast Fourier Transform)  
+   COMPLETE CALCULATION FOR MAGNESIUM (Mg)  
+    
+   INPUT DATA - Sample BR -7 (Sample Index 21)  
+   Spectral Data (21 features):  
+   1159.21, 208.78, 998.73, 281.32, 468.92, 923.83, 386.57, 469.43, 338.56, 94.0, 41.0, 15.0, 
+   572.86, 183.57, 68.98, 46.0, 110.09, 356.73, 86.629, 3.611, 2.644  
+   Actual Mg Value = 5.29432  
+    
+   LOGIC 5 FORMULA  
+   text 
+   Step 1: Preprocess spectrum (SNV + 1st Derivative + 2nd Derivative)  
+   Step 2: Apply FFT (Fast Fourier Transform)  
+   Step 3: Take magnitude of first 15 coefficients  
+   Step 4: Normalize by first coefficient  
+   Step 5: Use as features for KNN prediction  
+    
+   CALIBRATION DATA FOR MAGNESIUM  
+   Sample 
+   Index  Sample 
+   No. Mg 
+   Value  Spectrum (21 features)  
+   15 Sample 
+   16 1.2084  1869.31, 439.88, 1608.14, 494.59, 706.97, 1160.62, 545.98, 607.1, 
+   405.16, 111, 45.01, 19, 697.26, 209.56, 75.14, 51.01, 126, 388.98, 
+   556.899372, 9.015084, 7.350666  
+   4 Sample 
+   5 0 1167, 253.68, 1091.69, 333.26, 599.46, 987.54, 439.7, 517.46, 
+   363.6, 98.05, 41, 16, 610.69, 190.87, 74, 48, 113, 366.27, 
+   116.646692, 4.118252, 3.151008  
+
+[MATCH] Line 6424: SG/SV LOGIC - COMPLETE CALCULATION FOR COPPER (Cu)  
+    
+   INPUT DATA - Sample BR -7 (Sample Index 21)  
+   Spectral Data (21 features):  
+   1159.21, 208.78, 998.73, 281.32, 468.92, 923.83, 386.57, 469.43, 338.56, 94.0, 41.0, 15.0, 
+   572.86, 183.57, 68.98, 46.0, 110.09, 356.73, 86.629, 3.611, 2.644  
+   Actual Cu Value = 1.62  
+    
+   SG/SV LOGIC FORMULA  
+   text 
+   Step 1: Preprocess training spectra using Second Derivative (Savitzky -Golay)  
+   Step 2: Preprocess test spectrum using Second Derivative  
+   Step 3: Select top 3 bands with highest correlation to nutrient values  
+   Step 4: Build features (Energy) for training samples  
+   Step 5: Build features (Energy) for test sample  
+   Step 6: KNN + IDW prediction (k=3, power=1.0)  
+    
+   STEP 1: Load Calibration Data for Cu  
+   6 Calibration Samples (from code)  
+   Sample 
+   Index  Sample 
+   No. Cu 
+   Value  Spectrum (21 features)  
+   12 Sample 
+   13 0.43  986.97, 178.21, 845.65, 236.44, 415.52, 837.77, 339.09, 422.16, 
+   324.06, 91.99, 39.06, 14, 534.97, 181.52, 69, 45, 105.95, 361.2, 
+   43.796996, 3.4607, 2.259436  
+   19 Sample 
+   20 0.45  1861.48, 426.04, 1551.11, 486.63, 696.82, 1124.74, 524.96, 588.01, 
+   391.81, 107, 44, 19, 660.18, 198.08, 73, 49.75, 119.99, 368.23, 
+
+[MATCH] Line 6432: SG/SV LOGIC FORMULA  
+   text 
+   Step 1: Preprocess training spectra using Second Derivative (Savitzky -Golay)  
+   Step 2: Preprocess test spectrum using Second Derivative  
+   Step 3: Select top 3 bands with highest correlation to nutrient values  
+   Step 4: Build features (Energy) for training samples  
+   Step 5: Build features (Energy) for test sample  
+   Step 6: KNN + IDW prediction (k=3, power=1.0)  
+    
+   STEP 1: Load Calibration Data for Cu  
+   6 Calibration Samples (from code)  
+   Sample 
+   Index  Sample 
+   No. Cu 
+   Value  Spectrum (21 features)  
+   12 Sample 
+   13 0.43  986.97, 178.21, 845.65, 236.44, 415.52, 837.77, 339.09, 422.16, 
+   324.06, 91.99, 39.06, 14, 534.97, 181.52, 69, 45, 105.95, 361.2, 
+   43.796996, 3.4607, 2.259436  
+   19 Sample 
+   20 0.45  1861.48, 426.04, 1551.11, 486.63, 696.82, 1124.74, 524.96, 588.01, 
+   391.81, 107, 44, 19, 660.18, 198.08, 73, 49.75, 119.99, 368.23, 
+   598.595255, 9.2285, 7.487448  
+   3 Sample 
+   4 0.27  1696.39, 403.99, 1482.05, 467.99, 748.49, 1112.46, 534.35, 597.74, 
+   400.65, 109, 44, 19, 688.41, 207.7, 78.02, 52, 123.99, 389.39, 
+   453.860804, 7.982712, 6.448918  
+   17 Sample 
+   18 0.92  1125.28, 222.25, 1045.03, 304.99, 506.38, 967.02, 416.93, 494.99, 
+   354.4, 99, 42, 16, 612.69, 196.71, 71.99, 48, 116.02, 381.1, 

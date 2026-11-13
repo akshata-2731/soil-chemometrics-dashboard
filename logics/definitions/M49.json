@@ -1,0 +1,20 @@
+{
+    "id": "M49",
+    "name": "IP Zone Classification Logic",
+    "type": "Rule",
+    "target": "All 12 Nutrients",
+    "features": "Groups 1, 2, 3 (Dynamic)",
+    "required_ips": [
+        "ip1",
+        "ip2",
+        "ip3",
+        "N_ip1",
+        "N_ip3",
+        "P_ip1",
+        "P_ip2"
+    ],
+    "calibration_required": false,
+    "calibration_source": "N/A",
+    "verification_status": "VERIFIED",
+    "formula": "Calculates ip1, ip2, ip3 and matches nutrient-specific zones (e.g., N uses IP3, P uses IP1 & IP2)."
+}

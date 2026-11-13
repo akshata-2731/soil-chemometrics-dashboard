@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soil Nutrient Prediction Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #f2fbf4;
+    --surface: #ffffff;
+    --surface2: #f9fdfa;
+    --border: #c3e6cb;
+    --accent: #28a745;
+    --accent2: #20c997;
+    --accent3: #17a2b8;
+    --accent4: #6f42c1;
+    --warn: #ffc107;
+    --danger: #dc3545;
+    --text: #1a3320;
+    --muted: #6c757d;
+    --radius: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 13px;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; }
+  .logo-sub { color: var(--muted); font-size: 11px; margin-top: 1px; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    gap: 4px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 10px 16px;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+  /* PANELS */
+  .panel { display: none; padding: 24px; }
+  .panel.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+  /* WAVELENGTH INPUTS */
+  .wavelength-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+  }
+  .input-group { display: flex; flex-direction: column; gap: 4px; }
+  .input-label {
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .wavelength-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    color: var(--accent2);
+  }
+  input[type="number"], input[type="text"], select, textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 5px;
+    padding: 7px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent2);
+  }
+
+  /* BUTTONS */
+  .btn {
+    padding: 9px 18px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary {
+    background: var(--accent2);
+    color: #ffffff;
+  }
+  .btn-primary:hover { background: #79c0ff; }
+  .btn-success {
+    background: var(--accent);
+    color: #ffffff;
+  }
+  .btn-success:hover { background: #56d364; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+  .btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+  }
+  .btn-danger:hover { background: var(--danger); color: white; }
+  .btn-warn {
+    background: transparent;
+    color: var(--warn);
+    border: 1px solid var(--warn);
+  }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+  /* RESULTS */
+  .nutrient-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .nutrient-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .nutrient-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+  }
+  .nutrient-card.oc::before { background: #39d353; }
+  .nutrient-card.n::before { background: #58a6ff; }
+  .nutrient-card.p::before { background: #f0883e; }
+  .nutrient-card.k::before { background: #bc8cff; }
+  .nutrient-card.ca::before { background: #ffa657; }
+  .nutrient-card.mg::before { background: #79c0ff; }
+  .nutrient-card.s::before { background: #d2a8ff; }
+  .nutrient-card.fe::before { background: #ff7b72; }
+  .nutrient-card.mn::before { background: #ffa198; }
+  .nutrient-card.cu::before { background: #7ee787; }
+  .nutrient-card.zn::before { background: #56d364; }
+  .nutrient-card.b::before { background: #e3b341; }
+
+  .nc-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+  .nc-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+  .nc-value { font-size: 22px; font-weight: 600; font-family: 'Syne', sans-serif; }
+  .nc-unit { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* STATUS BADGE */
+  .badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .badge-low { background: rgba(248,81,73,0.15); color: var(--danger); border: 1px solid rgba(248,81,73,0.3); }
+  .badge-ok { background: rgba(57,211,83,0.15); color: var(--accent); border: 1px solid rgba(57,211,83,0.3); }
+  .badge-high { background: rgba(210,153,34,0.15); color: var(--warn); border: 1px solid rgba(210,153,34,0.3); }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    padding: 10px 12px;
+    color: var(--muted);
+    font-size: 11px;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(48,54,61,0.5);
+    font-size: 12px;
+  }
+  tr:hover td { background: rgba(0,0,0,0.03); }
+  .num { font-variant-numeric: tabular-nums; text-align: right; }
+
+  /* JSON EDITOR */
+  .json-editor {
+    background: #f9fdfa;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    min-height: 300px;
+    resize: vertical;
+    width: 100%;
+    line-height: 1.6;
+  }
+
+  /* FILE UPLOAD */
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--muted);
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(88,166,255,0.05);
+  }
+  .drop-zone .icon { font-size: 32px; margin-bottom: 8px; }
+  .drop-zone p { font-size: 12px; }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--accent);
+    transition: width 0.5s ease;
+  }
+
+  /* ALERT */
+  .alert {
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .alert-info { background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.3); color: var(--accent2); }
+  .alert-success { background: rgba(57,211,83,0.1); border: 1px solid rgba(57,211,83,0.3); color: var(--accent); }
+  .alert-warn { background: rgba(210,153,34,0.1); border: 1px solid rgba(210,153,34,0.3); color: var(--warn); }
+  .alert-error { background: rgba(248,81,73,0.1); border: 1px solid rgba(248,81,73,0.3); color: var(--danger); }
+
+  /* MINI CHART */
+  .mini-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .mini-bar-track {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .mini-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--accent2);
+    transition: width 0.6s ease;
+    max-width: 100%;
+  }
+  .mini-bar-label { font-size: 10px; color: var(--muted); width: 40px; text-align: right; }
+
+  /* LOGIC PLUGIN */
+  .plugin-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .plugin-card:hover { border-color: var(--accent2); }
+  .plugin-card.active-plugin { border-color: var(--accent); }
+  .plugin-name { font-weight: 600; font-size: 12px; }
+  .plugin-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .plugin-badge { font-size: 10px; padding: 2px 8px; border-radius: 12px; }
+
+  /* HISTORY */
+  .history-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .history-item:hover { border-color: var(--accent2); }
+  .history-meta { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+
+  /* SEPARATOR */
+  .sep { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* STATUS DOT */
+  .status-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  .status-dot.green { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .status-dot.yellow { background: var(--warn); }
+  .status-dot.red { background: var(--danger); }
+
+  .flex { display: flex; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  .gap-8 { gap: 8px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+
+  /* EXPORT */
+  .export-block {
+    background: #f9fdfa;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    font-size: 11px;
+    overflow-x: auto;
+    white-space: pre;
+    max-height: 200px;
+    overflow-y: auto;
+    color: #7ee787;
+  }
+
+  code {
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--accent3);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .grid-2, .grid-4 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🌱</div>
+    <div>
+      <div class="logo-text">SoilSpec<span style="color:var(--accent)">AI</span></div>
+      <div class="logo-sub">Spectral Nutrient Prediction Engine</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <span style="font-size:11px;color:var(--muted)"><span class="status-dot green"></span>Engine Ready</span>
+    <button class="btn btn-ghost" onclick="exportCSV()" style="font-size:11px">⬇ Export CSV</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <a class="tab" href="index.html" style="text-decoration:none;color:var(--accent);">← Back to Predict</a>
+  <div class="tab active" onclick="switchTab('calibration')">🔬 Calibration JSON</div>
+  <div class="tab" onclick="switchTab('logic')">⚙ Logic Plugins</div>
+  <div class="tab" onclick="switchTab('history')">📋 History</div>
+  <div class="tab" onclick="switchTab('settings')">🛠 Settings</div>
+</div>
+
+<!-- ======================== CALIBRATION PANEL ======================== -->
+<div id="panel-calibration" class="panel active">
+  <div class="grid-2" style="gap:20px">
+    <div>
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent3)"></span>Calibration JSON Editor</div>
+        <div class="alert alert-warn">⚠ Editing the calibration JSON directly affects prediction accuracy. Keep the structure intact.</div>
+        <textarea id="calEditor" class="json-editor" style="min-height:400px"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-success" onclick="saveCalibration()">💾 Save & Apply</button>
+          <button class="btn btn-ghost" onclick="resetCalibration()">↩ Reset to Original</button>
+          <button class="btn btn-ghost" onclick="loadCalJSON()">📁 Load JSON File</button>
+        </div>
+        <input type="file" id="calFile" accept=".json" style="display:none" onchange="loadCalJSONFile(event)">
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Nutrient Configuration</div>
+        <div id="nutrient-config-list"></div>
+        <button class="btn btn-ghost mt-16" onclick="addNutrient()" style="width:100%;justify-content:center">+ Add New Nutrient</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent4)"></span>JSON Structure Reference</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.8">
+          Each nutrient key requires:<br>
+          <code>vals</code> — [min_val, mid_val, max_val]<br>
+          <code>indices</code> — wavelength indices (0-20)<br>
+          <code>min/mid/max</code> — 21-element reference spectra<br>
+          <code>value_min/mid/max</code> — known concentration values<br>
+          <code>*_blank</code> — blank reference spectrum<br><br>
+          <strong>Wavelength index map:</strong><br>
+          0:410nm, 1:435nm, 2:460nm, 3:485nm, 4:510nm,<br>
+          5:535nm, 6:560nm, 7:585nm, 8:610nm, 9:645nm,<br>
+          10:680nm, 11:705nm, 12:730nm, 13:760nm, 14:810nm,<br>
+          15:860nm, 16:900nm, 17:940nm, 18:320nm, 19:280nm, 20:200nm
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== LOGIC PLUGINS ======================== -->
+<div id="panel-logic" class="panel">
+  <div class="grid-2" style="gap:20px">
+    <div>
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent4)"></span>Available Logic Plugins</div>
+        <div id="plugin-list"></div>
+        <hr class="sep">
+        <div class="card-title" style="margin-bottom:8px"><span class="dot"></span>Add Custom Logic (.py-style JS)</div>
+        <div class="alert alert-info">Write a JavaScript function <code>predictNutrient(nutrientData, sampleValues)</code> that returns a number. The function receives the calibration data object and the full 21-element sample array.</div>
+        <input type="text" id="pluginName" placeholder="Plugin name (e.g. 'Linear Regression')" style="margin-bottom:8px">
+        <input type="text" id="pluginDesc" placeholder="Short description" style="margin-bottom:8px">
+        <textarea id="pluginCode" style="min-height:200px;resize:vertical;font-family:'JetBrains Mono',monospace" placeholder="// Write your prediction function here
+// Must be named: predictNutrient(nutrientData, sampleValues)
+// Returns: a single predicted numeric value
+
+function predictNutrient(nutrientData, sampleValues) {
+  const { vals, indices, min, mid, max } = nutrientData;
+  
+  // Extract selected wavelengths
+  const sample = indices.map(i => sampleValues[i]);
+  const refMin = indices.map(i => min[i]);
+  const refMid = indices.map(i => mid[i]);
+  const refMax = indices.map(i => max[i]);
+  
+  // Your custom logic here...
+  
+  return prediction;
+}"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-success" onclick="addPlugin()">+ Add Plugin</button>
+          <button class="btn btn-ghost" onclick="loadPluginFile()">📁 Load .py / .js File</button>
+        </div>
+        <input type="file" id="pluginFile" accept=".py,.js,.txt" style="display:none" onchange="loadPluginFromFile(event)">
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent)"></span>Logic Comparison</div>
+        <div class="alert alert-info">Run all plugins on current sample input and compare results side-by-side.</div>
+        <button class="btn btn-primary" onclick="compareLogics()" style="width:100%;justify-content:center;margin-bottom:16px">⚡ Compare All Logics</button>
+        <div id="comparison-results"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Default Logic — Source Code</div>
+        <div class="export-block" style="color:#58a6ff;max-height:300px">//  Weighted Similarity Distance Algorithm
+//  Based on: S = 1 / (D + 1) where D = sum(|sample[i] - ref[i]|)
+//  for each selected wavelength index.
+//  Weights normalized so W_min + W_mid + W_max = 1.
+//  Prediction = vals[0]*W_min + vals[1]*W_mid + vals[2]*W_max
+
+function predictNutrient(nutrientData, sampleValues) {
+  const { vals, indices, min, mid, max } = nutrientData;
+  const sel = indices;
+
+  const Dmin = sel.reduce((s,i) => s + Math.abs(sampleValues[i]-(min[i]||0)), 0);
+  const Dmid = sel.reduce((s,i) => s + Math.abs(sampleValues[i]-(mid[i]||0)), 0);
+  const Dmax = sel.reduce((s,i) => s + Math.abs(sampleValues[i]-(max[i]||0)), 0);
+
+  const Smin = 1/(Dmin+1), Smid = 1/(Dmid+1), Smax = 1/(Dmax+1);
+  const total = Smin + Smid + Smax;
+
+  return (vals[0]*Smin + vals[1]*Smid + vals[2]*Smax) / total;
+}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== HISTORY PANEL ======================== -->
+<div id="panel-history" class="panel">
+  <div class="flex-between" style="margin-bottom:16px">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px">Prediction History</div>
+    <button class="btn btn-danger" onclick="clearHistory()">🗑 Clear All</button>
+  </div>
+  <div id="history-list">
+    <div class="alert alert-info">No predictions recorded yet. Run a prediction to see history here.</div>
+  </div>
+</div>
+
+<!-- ======================== SETTINGS PANEL ======================== -->
+<div id="panel-settings" class="panel">
+  <div class="grid-2" style="gap:20px">
+    <div>
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent)"></span>Display Settings</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="input-group">
+            <div class="input-label">Decimal Places</div>
+            <select id="decimalPlaces" onchange="settings.decimals=parseInt(this.value)">
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4" selected>4</option>
+              <option value="6">6</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <div class="input-label">Show Weights in Results</div>
+            <select id="showWeights" onchange="settings.showWeights=this.value==='true'">
+              <option value="true" selected>Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <div class="input-label">Show Status Badges</div>
+            <select id="showBadges" onchange="settings.showBadges=this.value==='true'">
+              <option value="true" selected>Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <div class="input-label">Auto-save to History</div>
+            <select id="autoHistory" onchange="settings.autoHistory=this.value==='true'">
+              <option value="true" selected>Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent3)"></span>Nutrient Units & Ranges</div>
+        <div id="units-editor"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Wavelength Labels</div>
+        <div id="wl-labels-editor" class="wavelength-grid" style="gap:6px"></div>
+        <div class="btn-row">
+          <button class="btn btn-success" onclick="saveSettings()">💾 Save Settings</button>
+          <button class="btn btn-ghost" onclick="resetSettings()">↩ Reset Defaults</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent4)"></span>Export / Import Config</div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="exportConfig()">⬇ Export Config JSON</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('importConfig').click()">⬆ Import Config</button>
+        </div>
+        <input type="file" id="importConfig" accept=".json" style="display:none" onchange="importConfigFile(event)">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== PASTE MODAL ======================== -->
+<div id="paste-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center">
+  <div class="card" style="max-width:500px;width:90%;margin:0">
+    <div class="card-title"><span class="dot"></span>Paste CSV Row</div>
+    <textarea id="paste-input" placeholder="Paste comma-separated values (21 numbers)..." style="min-height:80px;resize:none;width:100%"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="applyPaste()">Apply</button>
+      <button class="btn btn-ghost" onclick="closePasteModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ============================================================
+// CONSTANTS & CALIBRATION DATA
+// ============================================================
+const WAVELENGTHS_DEFAULT = [
+  { nm: 410, label: 'Violet' },
+  { nm: 435, label: 'Deep Blue' },
+  { nm: 460, label: 'Blue' },
+  { nm: 485, label: 'Cyan-Blue' },
+  { nm: 510, label: 'Cyan' },
+  { nm: 535, label: 'Green' },
+  { nm: 560, label: 'Yellow-Green' },
+  { nm: 585, label: 'Yellow' },
+  { nm: 610, label: 'Amber' },
+  { nm: 645, label: 'Orange' },
+  { nm: 680, label: 'Red' },
+  { nm: 705, label: 'Deep Red' },
+  { nm: 730, label: 'Far Red' },
+  { nm: 760, label: 'NIR-1' },
+  { nm: 810, label: 'NIR-2' },
+  { nm: 860, label: 'NIR-3' },
+  { nm: 900, label: 'NIR-4' },
+  { nm: 940, label: 'NIR-5' },
+  { nm: 320, label: 'UV-A' },
+  { nm: 280, label: 'UV-B' },
+  { nm: 200, label: 'UV-C' }
+];
+
+const NUTRIENT_META_DEFAULT = {
+  OC:  { fullName: 'Organic Carbon',       unit: '%',           lo: 0.5, hi: 1.5,  color: '#39d353', cls: 'oc' },
+  N:   { fullName: 'Nitrogen',             unit: 'kg/ha',       lo: 200, hi: 600,  color: '#58a6ff', cls: 'n' },
+  P:   { fullName: 'Phosphorus (P₂O₅)',    unit: 'kg/ha',       lo: 20,  hi: 200,  color: '#f0883e', cls: 'p' },
+  K:   { fullName: 'Potassium',            unit: 'kg/ha',       lo: 100, hi: 600,  color: '#bc8cff', cls: 'k' },
+  Ca:  { fullName: 'Calcium',              unit: 'meq/100g',    lo: 5,   hi: 80,   color: '#ffa657', cls: 'ca' },
+  Mg:  { fullName: 'Magnesium',            unit: 'meq/100g',    lo: 2,   hi: 40,   color: '#79c0ff', cls: 'mg' },
+  S:   { fullName: 'Sulfur',               unit: 'ppm',         lo: 30,  hi: 180,  color: '#d2a8ff', cls: 's' },
+  Fe:  { fullName: 'Iron',                 unit: 'ppm',         lo: 10,  hi: 40,   color: '#ff7b72', cls: 'fe' },
+  Mn:  { fullName: 'Manganese',            unit: 'ppm',         lo: 5,   hi: 20,   color: '#ffa198', cls: 'mn' },
+  Cu:  { fullName: 'Copper',               unit: 'ppm',         lo: 1,   hi: 8,    color: '#7ee787', cls: 'cu' },
+  Zn:  { fullName: 'Zinc',                 unit: 'ppm',         lo: 1,   hi: 8,    color: '#56d364', cls: 'zn' },
+  B:   { fullName: 'Boron',                unit: 'ppm',         lo: 0.5, hi: 8,    color: '#e3b341', cls: 'b' }
+};
+
+const ORIGINAL_CAL = {"OC": {"vals": [0.12, 0.27, 1.43], "indices": [6, 7, 18, 19, 20], "min": [1861.48, 426.04, 1551.11, 486.63, 696.82, 1124.74, 524.96, 588.01, 391.81, 107.0, 44.0, 19.0, 660.18, 198.08, 73.0, 49.75, 119.99, 368.23, 598.595255, 9.2285, 7.487448], "mid": [1158.5, 236.86, 1101.22, 317.04, 515.5, 984.7, 422.05, 499.88, 357.4, 100.0, 42.98, 16.0, 616.93, 199.0, 72.19, 48.01, 116.98, 382.03, 94.229444, 3.956748, 2.852158], "max": [1020.32, 211.94, 956.79, 288.0, 493.17, 919.26, 398.38, 479.16, 345.54, 95.0, 40.15, 15.0, 580.26, 186.94, 70.03, 46.19, 110.0, 363.75, 65.363512, 3.714492, 2.570995], "value_min": 0.12, "value_mid": 0.27, "value_max": 1.43}, "N": {"vals": [50.4, 144.0, 405.25], "indices": [0, 2, 5, 16], "min": [1158.5, 236.86, 1101.22, 317.04, 515.5, 984.7, 422.05, 499.88, 357.4, 100.0, 42.98, 16.0, 616.93, 199.0, 72.19, 48.01, 116.98, 382.03, 94.229444, 3.956748, 2.852158], "mid": [1123.67, 221.99, 1045.29, 304.82, 505.52, 967.28, 416.99, 495.0, 354.42, 99.0, 42.0, 16.0, 612.69, 197.88, 72.02, 48.0, 116.01, 380.69, 72.699244, 3.772172, 2.700178], "max": [1020.32, 211.94, 956.79, 288.0, 493.17, 919.26, 398.38, 479.16, 345.54, 95.0, 40.15, 15.0, 580.26, 186.94, 70.03, 46.19, 110.0, 363.75, 65.363512, 3.714492, 2.570995], "value_min": 50.4, "value_mid": 144.0, "value_max": 405.25}, "P": {"vals": [2.0, 702.06, 32.12], "indices": [1, 3, 7, 14], "min": [1123.67, 221.99, 1045.29, 304.82, 505.52, 967.28, 416.99, 495.0, 354.42, 99.0, 42.0, 16.0, 612.69, 197.88, 72.02, 48.0, 116.01, 380.69, 72.699244, 3.772172, 2.700178], "mid": [1696.39, 403.99, 1482.05, 467.99, 748.49, 1112.46, 534.35, 597.74, 400.65, 109.0, 44.0, 19.0, 688.41, 207.7, 78.02, 52.0, 123.99, 389.39, 453.860804, 7.982712, 6.448918], "max": [1020.32, 211.94, 956.79, 288.0, 493.17, 919.26, 398.38, 479.16, 345.54, 95.0, 40.15, 15.0, 580.26, 186.94, 70.03, 46.19, 110.0, 363.75, 65.363512, 3.714492, 2.570995], "value_min": 2.0, "value_mid": 702.06, "value_max": 32.12}, "K": {"vals": [82.0, 770.97, 1166.32], "indices": [0, 2, 4, 17], "min": [1123.67, 221.99, 1045.29, 304.82, 505.52, 967.28, 416.99, 495.0, 354.42, 99.0, 42.0, 16.0, 612.69, 197.88, 72.02, 48.0, 116.01, 380.69, 72.699244, 3.772172, 2.700178], "mid": [1020.32, 211.94, 956.79, 288.0, 493.17, 919.26, 398.38, 479.16, 345.54, 95.0, 40.15, 15.0, 580.26, 186.94, 70.03, 46.19, 110.0, 363.75, 65.363512, 3.714492, 2.570995], "max": [1019.24, 184.84, 890.4, 247.19, 437.35, 890.4, 369.0, 455.83, 346.75, 98.0, 41.0, 15.0, 586.56, 197.53, 72.97, 48.0, 113.09, 383.02, 46.204228, 3.466468, 2.327827], "value_min": 82.0, "value_mid": 770.97, "value_max": 1166.32}, "Ca": {"vals": [9.74135, 16.7046, 39.75345], "indices": [0, 4, 8, 12, 16], "min": [1861.48, 426.04, 1551.11, 486.63, 696.82, 1124.74, 524.96, 588.01, 391.81, 107.0, 44.0, 19.0, 660.18, 198.08, 73.0, 49.75, 119.99, 368.23, 598.595255, 9.2285, 7.487448], "mid": [1766.47, 422.09, 1528.69, 482.08, 693.9, 1118.79, 522.97, 583.93, 388.66, 105.94, 43.85, 19.0, 653.19, 195.41, 73.01, 49.01, 118.0, 369.14, 567.026348, 8.99778, 7.221483], "max": [1020.32, 211.94, 956.79, 288.0, 493.17, 919.26, 398.38, 479.16, 345.54, 95.0, 40.15, 15.0, 580.26, 186.94, 70.03, 46.19, 110.0, 363.75, 65.363512, 3.714492, 2.570995], "value_min": 9.74135, "value_mid": 16.7046, "value_max": 39.75345}, "Mg": {"vals": [1.2084, 6.81086, 5.20831], "indices": [1, 5, 9, 13, 17], "min": [1869.31, 439.88, 1608.14, 494.59, 706.97, 1160.62, 545.98, 607.1, 405.16, 111.0, 45.01, 19.0, 697.26, 209.56, 75.14, 51.01, 126.0, 388.98, 556.899372, 9.015084, 7.350666], "mid": [1020.32, 211.94, 956.79, 288.0, 493.17, 919.26, 398.38, 479.16, 345.54, 95.0, 40.15, 15.0, 580.26, 186.94, 70.03, 46.19, 110.0, 363.75, 65.363512, 3.714492, 2.570995], "max": [1676.99, 417.0, 1464.57, 468.08, 753.04, 1087.46, 531.06, 594.36, 399.15, 108.99, 43.97, 19.0, 682.58, 206.94, 78.0, 52.0, 122.78, 390.37, 487.04834, 8.173038, 6.666756], "value_min": 1.2084, "value_mid": 6.81086, "value_max": 5.20831}, "S": {"vals": [0.78, 4.15, 4.35], "indices": [2, 6, 10, 14, 18], "min": [1861.48, 426.04, 1551.11, 486.63, 696.82, 1124.74, 524.96, 588.01, 391.81, 107.0, 44.0, 19.0, 660.18, 198.08, 73.0, 49.75, 119.99, 368.23, 598.595255, 9.2285, 7.487448], "mid": [1696.39, 403.99, 1482.05, 467.99, 748.49, 1112.46, 534.35, 597.74, 400.65, 109.0, 44.0, 19.0, 688.41, 207.7, 78.02, 52.0, 123.99, 389.39, 453.860804, 7.982712, 6.448918], "max": [1125.28, 222.25, 1045.03, 304.99, 506.38, 967.02, 416.93, 494.99, 354.4, 99.0, 42.0, 16.0, 612.69, 196.71, 71.99, 48.0, 116.02, 381.1, 72.68368, 3.783708, 2.722975], "value_min": 0.78, "value_mid": 4.15, "value_max": 4.35}, "Fe": {"vals": [8.65, 19.44, 97.7], "indices": [0, 3, 6, 9, 15], "min": [1861.48, 426.04, 1551.11, 486.63, 696.82, 1124.74, 524.96, 588.01, 391.81, 107.0, 44.0, 19.0, 660.18, 198.08, 73.0, 49.75, 119.99, 368.23, 598.595255, 9.2285, 7.487448], "mid": [1020.32, 211.94, 956.79, 288.0, 493.17, 919.26, 398.38, 479.16, 345.54, 95.0, 40.15, 15.0, 580.26, 186.94, 70.03, 46.19, 110.0, 363.75, 65.363512, 3.714492, 2.570995], "max": [1676.99, 417.0, 1464.57, 468.08, 753.04, 1087.46, 531.06, 594.36, 399.15, 108.99, 43.97, 19.0, 682.58, 206.94, 78.0, 52.0, 122.78, 390.37, 487.04834, 8.173038, 6.666756], "value_min": 8.65, "value_mid": 19.44, "value_max": 97.7}, "Mn": {"vals": [3.5, 10.59, 23.05], "indices": [6, 7, 18, 19, 20], "min": [1861.48, 426.04, 1551.11, 486.63, 696.82, 1124.74, 524.96, 588.01, 391.81, 107.0, 44.0, 19.0, 660.18, 198.08, 73.0, 49.75, 119.99, 368.23, 598.595255, 9.2285, 7.487448], "mid": [1020.32, 211.94, 956.79, 288.0, 493.17, 919.26, 398.38, 479.16, 345.54, 95.0, 40.15, 15.0, 580.26, 186.94, 70.03, 46.19, 110.0, 363.75, 65.363512, 3.714492, 2.570995], "max": [1676.99, 417.0, 1464.57, 468.08, 753.04, 1087.46, 531.06, 594.36, 399.15, 108.99, 43.97, 19.0, 682.58, 206.94, 78.0, 52.0, 122.78, 390.37, 487.04834, 8.173038, 6.666756], "value_min": 3.5, "value_mid": 10.59, "value_max": 23.05}, "Cu": {"vals": [0.43, 0.45, 2.59], "indices": [9, 10, 14, 18], "min": [986.97, 178.21, 845.65, 236.44, 415.52, 837.77, 339.09, 422.16, 324.06, 91.99, 39.06, 14.0, 534.97, 181.52, 69.0, 45.0, 105.95, 361.2, 43.796996, 3.4607, 2.259436], "mid": [1861.48, 426.04, 1551.11, 486.63, 696.82, 1124.74, 524.96, 588.01, 391.81, 107.0, 44.0, 19.0, 660.18, 198.08, 73.0, 49.75, 119.99, 368.23, 598.595255, 9.2285, 7.487448], "max": [1020.32, 211.94, 956.79, 288.0, 493.17, 919.26, 398.38, 479.16, 345.54, 95.0, 40.15, 15.0, 580.26, 186.94, 70.03, 46.19, 110.0, 363.75, 65.363512, 3.714492, 2.570995], "value_min": 0.43, "value_mid": 0.45, "value_max": 2.59}, "Zn": {"vals": [0.94, 17.37, 20.62], "indices": [0, 4, 8, 12, 16], "min": [1696.39, 403.99, 1482.05, 467.99, 748.49, 1112.46, 534.35, 597.74, 400.65, 109.0, 44.0, 19.0, 688.41, 207.7, 78.02, 52.0, 123.99, 389.39, 453.860804, 7.982712, 6.448918], "mid": [1020.32, 211.94, 956.79, 288.0, 493.17, 919.26, 398.38, 479.16, 345.54, 95.0, 40.15, 15.0, 580.26, 186.94, 70.03, 46.19, 110.0, 363.75, 65.363512, 3.714492, 2.570995], "max": [1869.31, 439.88, 1608.14, 494.59, 706.97, 1160.62, 545.98, 607.1, 405.16, 111.0, 45.01, 19.0, 697.26, 209.56, 75.14, 51.01, 126.0, 388.98, 556.899372, 9.015084, 7.350666], "value_min": 0.94, "value_mid": 17.37, "value_max": 20.62}, "B": {"vals": [0.0, 0.0, 0.28], "indices": [0, 5, 10, 15, 20], "min": [1676.99, 417.0, 1464.57, 468.08, 753.04, 1087.46, 531.06, 594.36, 399.15, 108.99, 43.97, 19.0, 682.58, 206.94, 78.0, 52.0, 122.78, 390.37, 487.04834, 8.173038, 6.666756], "mid": [1861.48, 426.04, 1551.11, 486.63, 696.82, 1124.74, 524.96, 588.01, 391.81, 107.0, 44.0, 19.0, 660.18, 198.08, 73.0, 49.75, 119.99, 368.23, 598.595255, 9.2285, 7.487448], "max": [1789.76, 418.8, 1523.13, 479.09, 680.46, 1115.42, 523.09, 584.82, 389.16, 105.74, 43.84, 19.0, 654.21, 196.04, 72.0, 49.02, 119.0, 368.57, 570.113208, 8.76706, 7.163224], "value_min": 0.0, "value_mid": 0.0, "value_max": 0.28}};
+
+const SAMPLE_ROW = [1159.21, 208.78, 998.73, 281.32, 468.92, 923.83, 386.57, 469.43, 338.56, 94.0, 41.0, 15.0, 572.86, 183.57, 68.98, 46.0, 110.09, 356.73, 86.629, 3.611, 2.644];
+
+// ============================================================
+// STATE
+// ============================================================
+let calData = JSON.parse(localStorage.getItem('calData')) || JSON.parse(JSON.stringify(ORIGINAL_CAL));
+let nutrientMeta = JSON.parse(localStorage.getItem('nutrientMeta')) || JSON.parse(JSON.stringify(NUTRIENT_META_DEFAULT));
+let wavelengths = JSON.parse(localStorage.getItem('wavelengths')) || JSON.parse(JSON.stringify(WAVELENGTHS_DEFAULT));
+let predHistory = JSON.parse(localStorage.getItem('predHistory')) || [];
+let settings = JSON.parse(localStorage.getItem('settings')) || { decimals: 4, showWeights: true, showBadges: true, autoHistory: true };
+let activePluginIdx = parseInt(localStorage.getItem('activePluginIdx') || '0', 10);
+
+function saveState() {
+  localStorage.setItem('calData', JSON.stringify(calData));
+  localStorage.setItem('nutrientMeta', JSON.stringify(nutrientMeta));
+  localStorage.setItem('wavelengths', JSON.stringify(wavelengths));
+  localStorage.setItem('predHistory', JSON.stringify(predHistory));
+  localStorage.setItem('settings', JSON.stringify(settings));
+  localStorage.setItem('activePluginIdx', activePluginIdx.toString());
+}
+
+function clamp(v, lo, hi) {
+  return Math.max(lo, Math.min(hi, v));
+}
+
+const plugins = [
+  {
+    id: 1,
+    name: 'Standard Euclidean + IDW',
+    code: 'M1',
+    targetNutrient: 'OC',
+    targetNutrients: ['OC'],
+    desc: 'Euclidean distance across spectrum with Inverse Distance Weighting (IDW p=1.0)',
+    formula: 'd_i = √(Σ(S - C_i)²), w_i = 1/(d_i + ε), Pred = Σ(w_i × V_i) / Σw_i',
+    builtin: true,
+    active: true,
+    fn: function(d, s) {
+      const dm = Math.sqrt(d.min.reduce((a, v, i) => a + Math.pow(s[i] - v, 2), 0));
+      const dd = Math.sqrt(d.mid.reduce((a, v, i) => a + Math.pow(s[i] - v, 2), 0));
+      const dx = Math.sqrt(d.max.reduce((a, v, i) => a + Math.pow(s[i] - v, 2), 0));
+      const eps = 1e-10;
+      const wm = 1 / (dm + eps), wd = 1 / (dd + eps), wx = 1 / (dx + eps);
+      return (wm * d.vals[0] + wd * d.vals[1] + wx * d.vals[2]) / (wm + wd + wx);
+    }
+  },
+  {
+    id: 2,
+    name: 'Fingerprint Tanh + Manhattan',
+    code: 'M2',
+    targetNutrient: 'N',
+    targetNutrients: ['N'],
+    desc: 'Scale-normalized tanh transformation with Manhattan distance and IDW (p=2.0)',
+    formula: 'T(x)=tanh(x/max|s|), d=Σ|T(S)-T(C)|, w=1/(d+ε)², Pred=Σ(w×V)/Σw',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      const scaleS = Math.max(...s.map(Math.abs)) + 1e-10;
+      const scaleMin = Math.max(...d.min.map(Math.abs)) + 1e-10;
+      const scaleMid = Math.max(...d.mid.map(Math.abs)) + 1e-10;
+      const scaleMax = Math.max(...d.max.map(Math.abs)) + 1e-10;
+      
+      const tS = s.map(x => Math.tanh(x / scaleS));
+      const tMin = d.min.map(x => Math.tanh(x / scaleMin));
+      const tMid = d.mid.map(x => Math.tanh(x / scaleMid));
+      const tMax = d.max.map(x => Math.tanh(x / scaleMax));
+      
+      const dm = tS.reduce((a, v, i) => a + Math.abs(v - tMin[i]), 0);
+      const dd = tS.reduce((a, v, i) => a + Math.abs(v - tMid[i]), 0);
+      const dx = tS.reduce((a, v, i) => a + Math.abs(v - tMax[i]), 0);
+      
+      const eps = 1e-10;
+      const wm = 1 / Math.pow(dm + eps, 2);
+      const wd = 1 / Math.pow(dd + eps, 2);
+      const wx = 1 / Math.pow(dx + eps, 2);
+      return (wm * d.vals[0] + wd * d.vals[1] + wx * d.vals[2]) / (wm + wd + wx);
+    }
+  },
+  {
+    id: 3,
+    name: 'KNN Ratio Fusion',
+    code: 'M3',
+    targetNutrient: 'P',
+    targetNutrients: ['P'],
+    desc: 'Pairwise adjacent band ratios (i+1, i+2) with mean ratio Manhattan distance & IDW (p=2.0)',
+    formula: 'Ratio=S[i]/S[j], d=|Ratio_S - Ratio_C|, w=1/(d+ε)², Pred=Σ(w×V)/Σw',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      function getAvgRatio(vec) {
+        const ratios = [];
+        const eps = 1e-10;
+        for (let i = 0; i < vec.length; i++) {
+          if (i + 1 < vec.length) ratios.push(vec[i] / (vec[i+1] + eps));
+          if (i + 2 < vec.length) ratios.push(vec[i] / (vec[i+2] + eps));
+        }
+        return ratios.reduce((a, b) => a + b, 0) / (ratios.length || 1);
+      }
+      const rS = getAvgRatio(s);
+      const rMin = getAvgRatio(d.min);
+      const rMid = getAvgRatio(d.mid);
+      const rMax = getAvgRatio(d.max);
+      
+      const dm = Math.abs(rS - rMin);
+      const dd = Math.abs(rS - rMid);
+      const dx = Math.abs(rS - rMax);
+      
+      const eps = 1e-10;
+      const wm = 1 / Math.pow(dm + eps, 2);
+      const wd = 1 / Math.pow(dd + eps, 2);
+      const wx = 1 / Math.pow(dx + eps, 2);
+      return (wm * d.vals[0] + wd * d.vals[1] + wx * d.vals[2]) / (wm + wd + wx);
+    }
+  },
+  {
+    id: 4,
+    name: 'Spectral Nutrient Index',
+    code: 'M4',
+    targetNutrient: 'K',
+    targetNutrients: ['K'],
+    desc: 'Spread-weighted spectral index with normalized linear interpolation between MIN & MAX',
+    formula: 'W=|MAX-MIN|/Σspread, Index=Σ(S×W), t=(Idx_S - Idx_MIN)/(Idx_MAX - Idx_MIN), Pred=MIN+t×(MAX-MIN)',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      const spread = d.min.map((v, i) => Math.abs((d.max[i] || 0) - v) + 1e-10);
+      const sumSpread = spread.reduce((a, b) => a + b, 0);
+      const weights = spread.map(w => w / sumSpread);
+      
+      const idxS = s.reduce((a, v, i) => a + v * weights[i], 0);
+      const idxMin = d.min.reduce((a, v, i) => a + v * weights[i], 0);
+      const idxMax = d.max.reduce((a, v, i) => a + v * weights[i], 0);
+      
+      const denom = Math.abs(idxMax - idxMin) > 1e-10 ? (idxMax - idxMin) : 1e-10;
+      const t = clamp((idxS - idxMin) / denom, 0, 1);
+      return d.vals[0] + t * (d.vals[2] - d.vals[0]);
+    }
+  },
+  {
+    id: 5,
+    name: 'Spectral Voting Engine',
+    code: 'M5',
+    targetNutrient: 'K',
+    targetNutrients: ['K'],
+    desc: 'Per-wavelength nearest neighbor voting across reference points (MIN/MID/MAX)',
+    formula: 'Vote=argmin(|S[i]-C_k[i]|), Pred = (Votes_min×V_min + Votes_mid×V_mid + Votes_max×V_max) / Total',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      let votesMin = 0, votesMid = 0, votesMax = 0;
+      for (let i = 0; i < s.length; i++) {
+        const dm = Math.abs(s[i] - d.min[i]);
+        const dd = Math.abs(s[i] - d.mid[i]);
+        const dx = Math.abs(s[i] - d.max[i]);
+        const best = Math.min(dm, dd, dx);
+        if (best === dm) votesMin++;
+        else if (best === dd) votesMid++;
+        else votesMax++;
+      }
+      const total = votesMin + votesMid + votesMax || 1;
+      return (votesMin * d.vals[0] + votesMid * d.vals[1] + votesMax * d.vals[2]) / total;
+    }
+  },
+  {
+    id: 6,
+    name: 'Unified Adaptive',
+    code: 'M6',
+    targetNutrient: 'Ca',
+    targetNutrients: ['Ca'],
+    desc: 'Ensemble blend of local 2-point interpolation (40%) and global IDW (60%)',
+    formula: 'Pred = 0.4 × z_local(2-nearest) + 0.6 × z_idw(p=1.0)',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      const dm = Math.sqrt(d.min.reduce((a, v, i) => a + Math.pow(s[i] - v, 2), 0));
+      const dd = Math.sqrt(d.mid.reduce((a, v, i) => a + Math.pow(s[i] - v, 2), 0));
+      const dx = Math.sqrt(d.max.reduce((a, v, i) => a + Math.pow(s[i] - v, 2), 0));
+      
+      const pts = [[dm, d.vals[0]], [dd, d.vals[1]], [dx, d.vals[2]]];
+      pts.sort((a, b) => a[0] - b[0]);
+      
+      const d1 = pts[0][0], v1 = pts[0][1];
+      const d2 = pts[1][0], v2 = pts[1][1];
+      const zLocal = (v1 * d2 + v2 * d1) / (d1 + d2 + 1e-10);
+      
+      const eps = 1e-10;
+      const wm = 1 / (dm + eps), wd = 1 / (dd + eps), wx = 1 / (dx + eps);
+      const zIdw = (wm * d.vals[0] + wd * d.vals[1] + wx * d.vals[2]) / (wm + wd + wx);
+      
+      return 0.4 * zLocal + 0.6 * zIdw;
+    }
+  },
+  {
+    id: 7,
+    name: 'Adaptive Projection',
+    code: 'M7',
+    targetNutrient: 'Ca',
+    targetNutrients: ['Ca'],
+    desc: 'Vector projection of sample onto calibration direction vector (MID - MIN)',
+    formula: 'V=MID-MIN, S=Sample-MIN, α=clamp((S·V)/(V·V), 0, 1), Pred=MIN + α×(MAX - MIN)',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      const v = d.mid.map((val, i) => val - d.min[i]);
+      const sVec = s.map((val, i) => val - d.min[i]);
+      const dotSV = sVec.reduce((a, val, i) => a + val * v[i], 0);
+      const dotVV = v.reduce((a, val) => a + val * val, 0) + 1e-10;
+      const alpha = clamp(dotSV / dotVV, 0, 1);
+      return d.vals[0] + alpha * (d.vals[2] - d.vals[0]);
+    }
+  },
+  {
+    id: 8,
+    name: 'Weighted Projection',
+    code: 'M8',
+    targetNutrient: 'Mg',
+    targetNutrients: ['Mg'],
+    desc: 'Spread-weighted vector projection onto MIN-MID-MAX piecewise segments',
+    formula: 'W=spread/Σspread, α=clamp(Σ(W×S×V)/Σ(W×V²), 0, 1), Piecewise MIN→MID→MAX',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      const spread = d.min.map((v, i) => Math.abs((d.max[i] || 0) - v) + 1e-10);
+      const sumSpread = spread.reduce((a, b) => a + b, 0);
+      const weights = spread.map(w => w / sumSpread);
+      
+      const v = d.mid.map((val, i) => val - d.min[i]);
+      const sVec = s.map((val, i) => val - d.min[i]);
+      
+      const weightedSV = sVec.reduce((a, val, i) => a + weights[i] * val * v[i], 0);
+      const weightedVV = v.reduce((a, val) => a + weights[i] * val * val, 0) + 1e-10;
+      
+      const alpha = clamp(weightedSV / weightedVV, 0, 1);
+      if (alpha <= 1.0) {
+        return d.vals[0] + alpha * (d.vals[1] - d.vals[0]);
+      } else {
+        const beta = clamp(alpha - 1.0, 0, 1);
+        return d.vals[1] + beta * (d.vals[2] - d.vals[1]);
+      }
+    }
+  },
+  {
+    id: 9,
+    name: '10-Step Advanced',
+    code: 'M9',
+    targetNutrient: 'S',
+    targetNutrients: ['S'],
+    desc: 'Mean-ratio normalization, spread weighting, weighted Euclidean distance and IDW',
+    formula: 'Norm=S/mean(S), W=spread/Σspread, d=√(Σ(W×(Norm_S - Norm_C)²)), IDW p=1.0',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      const meanS = s.reduce((a, b) => a + b, 0) / s.length;
+      const meanMin = d.min.reduce((a, b) => a + b, 0) / d.min.length;
+      const meanMid = d.mid.reduce((a, b) => a + b, 0) / d.mid.length;
+      const meanMax = d.max.reduce((a, b) => a + b, 0) / d.max.length;
+      
+      const normS = s.map(x => x / meanS);
+      const normMin = d.min.map(x => x / meanMin);
+      const normMid = d.mid.map(x => x / meanMid);
+      const normMax = d.max.map(x => x / meanMax);
+      
+      const spread = normMin.map((v, i) => Math.abs(normMax[i] - v) + 1e-10);
+      const sumSpread = spread.reduce((a, b) => a + b, 0);
+      const weights = spread.map(w => w / sumSpread);
+      
+      const dm = Math.sqrt(normS.reduce((a, v, i) => a + weights[i] * Math.pow(v - normMin[i], 2), 0));
+      const dd = Math.sqrt(normS.reduce((a, v, i) => a + weights[i] * Math.pow(v - normMid[i], 2), 0));
+      const dx = Math.sqrt(normS.reduce((a, v, i) => a + weights[i] * Math.pow(v - normMax[i], 2), 0));
+      
+      const eps = 1e-10;
+      const wm = 1 / (dm + eps), wd = 1 / (dd + eps), wx = 1 / (dx + eps);
+      return (wm * d.vals[0] + wd * d.vals[1] + wx * d.vals[2]) / (wm + wd + wx);
+    }
+  },
+  {
+    id: 10,
+    name: 'Dense Ladder',
+    code: 'M10',
+    targetNutrient: 'Fe',
+    targetNutrients: ['Fe'],
+    desc: '50-step synthetic spectra ladder along MIN-MAX trajectory with top-3 IDW interpolation',
+    formula: '50 synthetic steps on MIN→MAX path, find top 3 nearest synthetic spectra, IDW p=1.0',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      const steps = 50;
+      const ladder = [];
+      for (let k = 0; k <= steps; k++) {
+        const t = k / steps;
+        const valK = d.vals[0] + t * (d.vals[2] - d.vals[0]);
+        let distSq = 0;
+        for (let i = 0; i < s.length; i++) {
+          const specK = d.min[i] + t * (d.max[i] - d.min[i]);
+          distSq += Math.pow(s[i] - specK, 2);
+        }
+        ladder.push({ dist: Math.sqrt(distSq), val: valK });
+      }
+      ladder.sort((a, b) => a.dist - b.dist);
+      const top3 = ladder.slice(0, 3);
+      const eps = 1e-10;
+      const wTotal = top3.reduce((a, item) => a + 1 / (item.dist + eps), 0);
+      return top3.reduce((a, item) => a + (1 / (item.dist + eps)) * item.val, 0) / wTotal;
+    }
+  },
+  {
+    id: 11,
+    name: 'Carbon Response Index',
+    code: 'M11',
+    targetNutrient: 'Mn',
+    targetNutrients: ['Mn'],
+    desc: 'Specific spectral ratio index (B18+B19+B20)/(B6+B7) with safe interpolation',
+    formula: 'CRI = (B18+B19+B20)/(B6+B7), t=clamp((CRI_S - CRI_MIN)/(CRI_MAX - CRI_MIN), 0, 1), Pred=MIN+t×(MAX-MIN)',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      function getCR(vec) {
+        const num = (vec[18] || 0) + (vec[19] || 0) + (vec[20] || 0);
+        const den = (vec[6] || 0) + (vec[7] || 0) + 1e-10;
+        return num / den;
+      }
+      const crS = getCR(s);
+      const crMin = getCR(d.min);
+      const crMax = getCR(d.max);
+      const denom = Math.abs(crMax - crMin) > 1e-10 ? (crMax - crMin) : 1e-10;
+      const t = clamp((crS - crMin) / denom, 0, 1);
+      return d.vals[0] + t * (d.vals[2] - d.vals[0]);
+    }
+  },
+  {
+    id: 12,
+    name: 'Spectral Energy',
+    code: 'M12',
+    targetNutrient: 'Cu',
+    targetNutrients: ['Cu'],
+    desc: 'Total integrated spectral energy with normalized interpolation',
+    formula: 'Energy = Σ(spectrum), t=clamp((E_S - E_MIN)/(E_MAX - E_MIN), 0, 1), Pred=MIN+t×(MAX-MIN)',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      const eS = s.reduce((a, b) => a + b, 0);
+      const eMin = d.min.reduce((a, b) => a + b, 0);
+      const eMax = d.max.reduce((a, b) => a + b, 0);
+      const denom = Math.abs(eMax - eMin) > 1e-10 ? (eMax - eMin) : 1e-10;
+      const t = clamp((eS - eMin) / denom, 0, 1);
+      return d.vals[0] + t * (d.vals[2] - d.vals[0]);
+    }
+  },
+  {
+    id: 13,
+    name: 'Projection Vector',
+    code: 'M13',
+    targetNutrient: 'Zn',
+    targetNutrients: ['Zn'],
+    desc: 'Directional spectral vector projection along MIN→MID calibration axis',
+    formula: 'V=MID-MIN, S=Sample-MIN, α=clamp((S·V)/(V·V), 0, 1), Pred=MIN + α×(MAX - MIN)',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      const v = d.mid.map((val, i) => val - d.min[i]);
+      const sVec = s.map((val, i) => val - d.min[i]);
+      const dotSV = sVec.reduce((a, val, i) => a + val * v[i], 0);
+      const dotVV = v.reduce((a, val) => a + val * val, 0) + 1e-10;
+      const alpha = clamp(dotSV / dotVV, 0, 1);
+      return d.vals[0] + alpha * (d.vals[2] - d.vals[0]);
+    }
+  },
+  {
+    id: 14,
+    name: 'Spectral Angle',
+    code: 'M14',
+    targetNutrient: 'B',
+    targetNutrients: ['B'],
+    desc: 'Spectral Angle Mapper (SAM) measuring angle θ between spectral vectors, IDW (p=1.5)',
+    formula: 'cos(θ)=(A·B)/(||A||×||B||), θ=arccos(cos θ), w=1/(θ+ε)^1.5, Pred=Σ(w×V)/Σw',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      function angle(v1, v2) {
+        const dot = v1.reduce((a, val, i) => a + val * v2[i], 0);
+        const norm1 = Math.sqrt(v1.reduce((a, val) => a + val * val, 0)) + 1e-10;
+        const norm2 = Math.sqrt(v2.reduce((a, val) => a + val * val, 0)) + 1e-10;
+        const cosTheta = clamp(dot / (norm1 * norm2), -1, 1);
+        return Math.acos(cosTheta);
+      }
+      const thetaMin = angle(s, d.min);
+      const thetaMid = angle(s, d.mid);
+      const thetaMax = angle(s, d.max);
+      
+      const eps = 1e-10;
+      const wm = 1 / Math.pow(thetaMin + eps, 1.5);
+      const wd = 1 / Math.pow(thetaMid + eps, 1.5);
+      const wx = 1 / Math.pow(thetaMax + eps, 1.5);
+      return (wm * d.vals[0] + wd * d.vals[1] + wx * d.vals[2]) / (wm + wd + wx);
+    }
+  },
+  {
+    id: 15,
+    name: 'Spectral Gradient',
+    code: 'M15',
+    targetNutrient: 'OC',
+    targetNutrients: ['OC'],
+    desc: 'First derivative (spectral gradient Δs) with Euclidean distance and IDW (p=1.0)',
+    formula: 'G[i]=S[i+1]-S[i], d=√(Σ(G_S - G_C)²), w=1/(d+ε), Pred=Σ(w×V)/Σw',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      function grad(vec) {
+        const g = [];
+        for (let i = 0; i < vec.length - 1; i++) g.push(vec[i+1] - vec[i]);
+        return g;
+      }
+      const gS = grad(s);
+      const gMin = grad(d.min);
+      const gMid = grad(d.mid);
+      const gMax = grad(d.max);
+      
+      const dm = Math.sqrt(gS.reduce((a, v, i) => a + Math.pow(v - gMin[i], 2), 0));
+      const dd = Math.sqrt(gS.reduce((a, v, i) => a + Math.pow(v - gMid[i], 2), 0));
+      const dx = Math.sqrt(gS.reduce((a, v, i) => a + Math.pow(v - gMax[i], 2), 0));
+      
+      const eps = 1e-10;
+      const wm = 1 / (dm + eps), wd = 1 / (dd + eps), wx = 1 / (dx + eps);
+      return (wm * d.vals[0] + wd * d.vals[1] + wx * d.vals[2]) / (wm + wd + wx);
+    }
+  },
+  {
+    id: 16,
+    name: 'Dynamic Ratio',
+    code: 'M16',
+    targetNutrient: 'OC',
+    targetNutrients: ['OC'],
+    desc: 'Multi-band combination index (B2+B4+B7)/B13 with safe interpolation',
+    formula: 'DRI=(B2+B4+B7)/B13, t=clamp((DRI_S - DRI_MIN)/(DRI_MAX - DRI_MIN), 0, 1), Pred=MIN+t×(MAX-MIN)',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      function dr(vec) {
+        return ((vec[2] || 0) + (vec[4] || 0) + (vec[7] || 0)) / ((vec[13] || 0) + 1e-10);
+      }
+      const drS = dr(s);
+      const drMin = dr(d.min);
+      const drMax = dr(d.max);
+      const denom = Math.abs(drMax - drMin) > 1e-10 ? (drMax - drMin) : 1e-10;
+      const t = clamp((drS - drMin) / denom, 0, 1);
+      return d.vals[0] + t * (d.vals[2] - d.vals[0]);
+    }
+  },
+  {
+    id: 17,
+    name: 'Multi Ratio Sulphur',
+    code: 'M17',
+    targetNutrient: 'S',
+    targetNutrients: ['S'],
+    desc: 'Three-band adjacent ratio score (B0/B1 + B1/B2 + B2/B3)/3 with Manhattan IDW (p=1.0)',
+    formula: 'Score=(B0/B1 + B1/B2 + B2/B3)/3, d=|Score_S - Score_C|, w=1/(d+ε), Pred=Σ(w×V)/Σw',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      function mrs(vec) {
+        const r1 = vec[0] / ((vec[1] || 0) + 1e-10);
+        const r2 = vec[1] / ((vec[2] || 0) + 1e-10);
+        const r3 = vec[2] / ((vec[3] || 0) + 1e-10);
+        return (r1 + r2 + r3) / 3;
+      }
+      const scS = mrs(s);
+      const scMin = mrs(d.min);
+      const scMid = mrs(d.mid);
+      const scMax = mrs(d.max);
+      
+      const dm = Math.abs(scS - scMin);
+      const dd = Math.abs(scS - scMid);
+      const dx = Math.abs(scS - scMax);
+      
+      const eps = 1e-10;
+      const wm = 1 / (dm + eps), wd = 1 / (dd + eps), wx = 1 / (dx + eps);
+      return (wm * d.vals[0] + wd * d.vals[1] + wx * d.vals[2]) / (wm + wd + wx);
+    }
+  },
+  {
+    id: 18,
+    name: 'Spectral Centroid',
+    code: 'M18',
+    targetNutrient: 'Fe',
+    targetNutrients: ['Fe'],
+    desc: 'Center of spectral mass / spectral wavelength centroid with safe interpolation',
+    formula: 'Centroid=Σ(i×S[i])/ΣS[i], t=clamp((C_S - C_MIN)/(C_MAX - C_MIN), 0, 1), Pred=MIN+t×(MAX-MIN)',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      function sc(vec) {
+        const num = vec.reduce((a, val, i) => a + i * val, 0);
+        const den = vec.reduce((a, val) => a + val, 0) + 1e-10;
+        return num / den;
+      }
+      const cS = sc(s);
+      const cMin = sc(d.min);
+      const cMax = sc(d.max);
+      const denom = Math.abs(cMax - cMin) > 1e-10 ? (cMax - cMin) : 1e-10;
+      const t = clamp((cS - cMin) / denom, 0, 1);
+      return d.vals[0] + t * (d.vals[2] - d.vals[0]);
+    }
+  },
+  {
+    id: 19,
+    name: 'Spectral Curvature',
+    code: 'M19',
+    targetNutrient: 'Mn',
+    targetNutrients: ['Mn'],
+    desc: 'Second derivative spectral curvature (B14 - 2×B16 + B18) with safe interpolation',
+    formula: 'Curv=B14 - 2×B16 + B18, t=clamp((Curv_S - Curv_MIN)/(Curv_MAX - Curv_MIN), 0, 1), Pred=MIN+t×(MAX-MIN)',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      function curv(vec) {
+        return (vec[14] || 0) - 2 * (vec[16] || 0) + (vec[18] || 0);
+      }
+      const cS = curv(s);
+      const cMin = curv(d.min);
+      const cMax = curv(d.max);
+      const denom = Math.abs(cMax - cMin) > 1e-10 ? (cMax - cMin) : 1e-10;
+      const t = clamp((cS - cMin) / denom, 0, 1);
+      return d.vals[0] + t * (d.vals[2] - d.vals[0]);
+    }
+  },
+  {
+    id: 20,
+    name: 'Gain Corrected',
+    code: 'M20',
+    targetNutrient: 'Cu',
+    targetNutrients: ['Cu'],
+    desc: 'Geometric mean ratio gain factor √((B18/B10) × (B14/B9)) with safe interpolation',
+    formula: 'Gain=√((B18/B10)×(B14/B9)), t=clamp((G_S - G_MIN)/(G_MAX - G_MIN), 0, 1), Pred=MIN+t×(MAX-MIN)',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      function gain(vec) {
+        const r1 = (vec[18] || 0) / ((vec[10] || 0) + 1e-10);
+        const r2 = (vec[14] || 0) / ((vec[9] || 0) + 1e-10);
+        return Math.sqrt(Math.max(0, r1 * r2));
+      }
+      const gS = gain(s);
+      const gMin = gain(d.min);
+      const gMax = gain(d.max);
+      const denom = Math.abs(gMax - gMin) > 1e-10 ? (gMax - gMin) : 1e-10;
+      const t = clamp((gS - gMin) / denom, 0, 1);
+      return d.vals[0] + t * (d.vals[2] - d.vals[0]);
+    }
+  },
+  {
+    id: 22,
+    name: 'Blended Regression',
+    code: 'M22',
+    targetNutrient: 'K',
+    targetNutrients: ['K'],
+    desc: 'Hybrid ensemble blending Pearson correlation regression with Euclidean IDW based on confidence',
+    formula: 'Pred_IDW(p=1.0), Pred_Reg(Pearson-weighted), Conf=1/(1+min(d)), Blend=(1-Conf)×Reg + Conf×IDW',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      function pearson(v1, v2) {
+        const m1 = v1.reduce((a, b) => a + b, 0) / v1.length;
+        const m2 = v2.reduce((a, b) => a + b, 0) / v2.length;
+        const num = v1.reduce((a, val, i) => a + (val - m1) * (v2[i] - m2), 0);
+        const d1 = Math.sqrt(v1.reduce((a, val) => a + Math.pow(val - m1, 2), 0));
+        const d2 = Math.sqrt(v2.reduce((a, val) => a + Math.pow(val - m2, 2), 0));
+        return num / (d1 * d2 + 1e-10);
+      }
+      const dm = Math.sqrt(d.min.reduce((a, v, i) => a + Math.pow(s[i] - v, 2), 0));
+      const dd = Math.sqrt(d.mid.reduce((a, v, i) => a + Math.pow(s[i] - v, 2), 0));
+      const dx = Math.sqrt(d.max.reduce((a, v, i) => a + Math.pow(s[i] - v, 2), 0));
+      
+      const eps = 1e-10;
+      const wm = 1 / (dm + eps), wd = 1 / (dd + eps), wx = 1 / (dx + eps);
+      const predInterp = (wm * d.vals[0] + wd * d.vals[1] + wx * d.vals[2]) / (wm + wd + wx);
+      
+      const rMin = Math.max(0, pearson(s, d.min));
+      const rMid = Math.max(0, pearson(s, d.mid));
+      const rMax = Math.max(0, pearson(s, d.max));
+      const totR = rMin + rMid + rMax + 1e-10;
+      const predReg = (rMin * d.vals[0] + rMid * d.vals[1] + rMax * d.vals[2]) / totR;
+      
+      const minD = Math.min(dm, dd, dx);
+      const conf = 1 / (1 + minD);
+      return (1 - conf) * predReg + conf * predInterp;
+    }
+  },
+  {
+    id: 23,
+    name: 'Fingerprint Transform',
+    code: 'M23',
+    targetNutrient: 'Mg',
+    targetNutrients: ['Mg'],
+    desc: 'Normalized spectral fingerprint (norm[0]×norm[1])/(norm[2]+ε) with Manhattan IDW (p=1.0)',
+    formula: 'Norm=S/max|S|, FP=(Norm[0]×Norm[1])/(Norm[2]+ε), d=|FP_S - FP_C|, w=1/(d+ε), Pred=Σ(w×V)/Σw',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      function getFp(vec) {
+        const mx = Math.max(...vec.map(Math.abs)) + 1e-10;
+        const norm = vec.map(x => x / mx);
+        return (norm[0] * norm[1]) / ((norm[2] || 0) + 1e-10);
+      }
+      const fpS = getFp(s);
+      const fpMin = getFp(d.min);
+      const fpMid = getFp(d.mid);
+      const fpMax = getFp(d.max);
+      
+      const dm = Math.abs(fpS - fpMin);
+      const dd = Math.abs(fpS - fpMid);
+      const dx = Math.abs(fpS - fpMax);
+      
+      const eps = 1e-10;
+      const wm = 1 / (dm + eps), wd = 1 / (dd + eps), wx = 1 / (dx + eps);
+      return (wm * d.vals[0] + wd * d.vals[1] + wx * d.vals[2]) / (wm + wd + wx);
+    }
+  },
+  {
+    id: 24,
+    name: 'Piecewise Interpolation',
+    code: 'M24',
+    targetNutrient: 'Zn',
+    targetNutrients: ['Zn'],
+    desc: 'Spectral mean position piecewise interpolation through MIN → MID → MAX nodes',
+    formula: 'Pos=(mean(S)-mean(MIN))/(mean(MAX)-mean(MIN)), Piecewise linear through MID',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      const meanS = s.reduce((a, b) => a + b, 0) / s.length;
+      const meanMin = d.min.reduce((a, b) => a + b, 0) / d.min.length;
+      const meanMid = d.mid.reduce((a, b) => a + b, 0) / d.mid.length;
+      const meanMax = d.max.reduce((a, b) => a + b, 0) / d.max.length;
+      
+      const denom = Math.abs(meanMax - meanMin) > 1e-10 ? (meanMax - meanMin) : 1e-10;
+      const pos = (meanS - meanMin) / denom;
+      const midPos = (meanMid - meanMin) / denom;
+      
+      if (pos <= midPos) {
+        const t = clamp(pos / (midPos + 1e-10), 0, 1);
+        return d.vals[0] + t * (d.vals[1] - d.vals[0]);
+      } else {
+        const t = clamp((pos - midPos) / (1 - midPos + 1e-10), 0, 1);
+        return d.vals[1] + t * (d.vals[2] - d.vals[1]);
+      }
+    }
+  },
+  {
+    id: 25,
+    name: 'Similarity Weighted Interpolation',
+    code: 'M25',
+    targetNutrient: 'N',
+    targetNutrients: ['N', 'OC'],
+    desc: 'Per-wavelength Cauchy similarity metric S_i = 1/(|S[i]-C[i]| + 1) summed across all bands',
+    formula: 'T_k = Σ 1/(|S[i]-C_k[i]| + 1), W_k = T_k / Σ T, Pred = Σ(W_k × V_k)',
+    builtin: true,
+    active: false,
+    fn: function(d, s) {
+      const sm = s.reduce((a, val, i) => a + 1 / (Math.abs(val - d.min[i]) + 1), 0);
+      const sd = s.reduce((a, val, i) => a + 1 / (Math.abs(val - d.mid[i]) + 1), 0);
+      const sx = s.reduce((a, val, i) => a + 1 / (Math.abs(val - d.max[i]) + 1), 0);
+      const total = sm + sd + sx || 1;
+      return (sm * d.vals[0] + sd * d.vals[1] + sx * d.vals[2]) / total;
+    }
+  }
+];
+
+// Mapping nutrient to its default recommended plugin index
+const NUTRIENT_DEFAULT_LOGIC_MAP = {
+  OC: 0,   // M1: Standard Euclidean + IDW
+  N:  1,   // M2: Fingerprint Tanh + Manhattan
+  P:  2,   // M3: KNN Ratio Fusion
+  K:  3,   // M4: Spectral Nutrient Index
+  Ca: 5,   // M6: Unified Adaptive
+  Mg: 7,   // M8: Weighted Projection
+  S:  8,   // M9: 10-Step Advanced
+  Fe: 9,   // M10: Dense Ladder
+  Mn: 10,  // M11: Carbon Response
+  Cu: 11,  // M12: Spectral Energy
+  Zn: 12,  // M13: Projection Vector
+  B:  13   // M14: Spectral Angle
+};
+
+window.onload = function() {
+  buildCalEditor();
+  buildPluginList();
+  renderHistory();
+  buildUnitsEditor();
+  buildWlLabelsEditor();
+};
+
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  if (event && event.currentTarget) event.currentTarget.classList.add('active');
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+  if (id === 'calibration') buildCalEditor();
+  if (id === 'logic') buildPluginList();
+  if (id === 'history') renderHistory();
+  if (id === 'settings') {
+    buildUnitsEditor();
+    buildWlLabelsEditor();
+  }
+}
+
+// ============================================================
+// CALIBRATION JSON EDITOR
+// ============================================================
+function buildCalEditor() {
+  const txt = document.getElementById('cal-json-editor');
+  if (txt) {
+    txt.value = JSON.stringify(calData, null, 2);
+  }
+}
+
+function saveCalibration() {
+  const txt = document.getElementById('cal-json-editor');
+  if (!txt) return;
+  try {
+    const parsed = JSON.parse(txt.value);
+    calData = parsed;
+    saveState();
+    alert('✓ Calibration data saved successfully!');
+  } catch(e) {
+    alert('❌ Invalid JSON syntax: ' + e.message);
+  }
+}
+
+function resetCalibration() {
+  if (confirm('Reset calibration data to original solved document defaults?')) {
+    calData = JSON.parse(JSON.stringify(ORIGINAL_CAL));
+    saveState();
+    buildCalEditor();
+    alert('✓ Calibration data reset to defaults.');
+  }
+}
+
+function loadCalJSONFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const parsed = JSON.parse(evt.target.result);
+      calData = parsed;
+      saveState();
+      buildCalEditor();
+      alert('✓ Calibration JSON file loaded successfully!');
+    } catch(err) {
+      alert('❌ Error reading JSON file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ============================================================
+// LOGIC PLUGINS LIST (ALL 24 METHODS)
+// ============================================================
+function buildPluginList() {
+  const container = document.getElementById('plugin-list');
+  if (!container) return;
+  container.innerHTML = '';
+
+  plugins.forEach((p, idx) => {
+    const isActive = idx === activePluginIdx;
+    const card = document.createElement('div');
+    card.className = `plugin-card ${isActive ? 'active-plugin' : ''}`;
+    card.style.cursor = 'pointer';
+    card.onclick = () => setActivePlugin(idx);
+
+    const targetBadge = p.targetNutrient ? `<span class="badge" style="background:rgba(88,166,255,0.2);color:var(--accent2);font-weight:600;font-size:10px;margin-right:6px;">Target: ${p.targetNutrient}</span>` : '';
+
+    card.innerHTML = `
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent2);">[${p.code}]</span>
+          <span class="plugin-name">${p.name}</span>
+          ${targetBadge}
+          ${isActive ? '<span class="badge badge-optimal" style="font-size:10px;">Active Primary</span>' : ''}
+        </div>
+        <div class="plugin-desc" style="margin-top:4px;">${p.desc}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;font-family:'JetBrains Mono',monospace;background:var(--surface3);padding:4px 8px;border-radius:4px;">
+          Formula: ${p.formula}
+        </div>
+      </div>
+      <div>
+        <button class="btn btn-ghost" style="font-size:11px;" onclick="event.stopPropagation(); setActivePlugin(${idx})">
+          ${isActive ? '✓ Selected' : 'Select'}
+        </button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function setActivePlugin(idx) {
+  activePluginIdx = idx;
+  saveState();
+  buildPluginList();
+}
+
+// ============================================================
+// HISTORY
+// ============================================================
+function renderHistory() {
+  const container = document.getElementById('history-list');
+  if (!container) return;
+  if (predHistory.length === 0) {
+    container.innerHTML = '<div class="alert alert-info">No prediction history recorded yet.</div>';
+    return;
+  }
+  container.innerHTML = '';
+  predHistory.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    const samplePreview = item.sample.slice(0, 5).map(v => v.toFixed(1)).join(', ') + '...';
+    div.innerHTML = `
+      <div class="flex-between history-meta">
+        <span><strong>${item.ts}</strong></span>
+        <span>${item.plugin || ''}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Sample: [${samplePreview}]</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${Object.keys(item.results).map(n => {
+          const r = item.results[n];
+          return `<span style="font-size:11px;background:var(--surface3);padding:2px 6px;border-radius:3px;"><strong>${n}:</strong> ${typeof r.value === 'number' ? r.value.toFixed(2) : r.value}</span>`;
+        }).join('')}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function clearHistory() {
+  if (confirm('Clear all prediction history?')) {
+    predHistory = [];
+    saveState();
+    renderHistory();
+  }
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function buildUnitsEditor() {
+  const container = document.getElementById('units-editor');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const order = ['OC','N','P','K','Ca','Mg','S','Fe','Mn','Cu','Zn','B'];
+  order.forEach(n => {
+    const meta = nutrientMeta[n] || { fullName: n, unit: '', lo: 0, hi: 100 };
+    const div = document.createElement('div');
+    div.className = 'grid-4';
+    div.style.alignItems = 'center';
+    div.style.marginBottom = '8px';
+    div.innerHTML = `
+      <div><strong style="color:var(--text)">${n}</strong> <span style="font-size:11px;color:var(--muted)">(${meta.fullName})</span></div>
+      <div><input type="text" value="${meta.unit}" id="unit-${n}" style="font-size:11px;" placeholder="Unit"></div>
+      <div><input type="number" value="${meta.lo}" id="lo-${n}" style="font-size:11px;" placeholder="Low Range" step="any"></div>
+      <div><input type="number" value="${meta.hi}" id="hi-${n}" style="font-size:11px;" placeholder="High Range" step="any"></div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function buildWlLabelsEditor() {
+  const container = document.getElementById('wl-labels-editor');
+  if (!container) return;
+  container.innerHTML = '';
+  wavelengths.forEach((wl, idx) => {
+    const div = document.createElement('div');
+    div.className = 'grid-3';
+    div.style.alignItems = 'center';
+    div.style.marginBottom = '6px';
+    div.innerHTML = `
+      <div><span class="wavelength-badge">${wl.nm}nm</span> [${idx}]</div>
+      <div><input type="text" value="${wl.label}" id="wl-label-${idx}" style="font-size:11px;"></div>
+      <div><input type="number" value="${wl.nm}" id="wl-nm-${idx}" style="font-size:11px;"></div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function saveSettings() {
+  const order = ['OC','N','P','K','Ca','Mg','S','Fe','Mn','Cu','Zn','B'];
+  order.forEach(n => {
+    const unitEl = document.getElementById('unit-' + n);
+    const loEl = document.getElementById('lo-' + n);
+    const hiEl = document.getElementById('hi-' + n);
+    if (unitEl && nutrientMeta[n]) nutrientMeta[n].unit = unitEl.value;
+    if (loEl && nutrientMeta[n]) nutrientMeta[n].lo = parseFloat(loEl.value) || 0;
+    if (hiEl && nutrientMeta[n]) nutrientMeta[n].hi = parseFloat(hiEl.value) || 100;
+  });
+
+  wavelengths.forEach((wl, idx) => {
+    const lbl = document.getElementById('wl-label-' + idx);
+    const nm = document.getElementById('wl-nm-' + idx);
+    if (lbl) wl.label = lbl.value;
+    if (nm) wl.nm = parseInt(nm.value) || wl.nm;
+  });
+
+  saveState();
+  alert('✓ Settings saved successfully!');
+}
+
+function resetSettings() {
+  if (confirm('Reset settings to defaults?')) {
+    nutrientMeta = JSON.parse(JSON.stringify(NUTRIENT_META_DEFAULT));
+    wavelengths = JSON.parse(JSON.stringify(WAVELENGTHS_DEFAULT));
+    settings = { decimals: 4, showWeights: true, showBadges: true, autoHistory: true };
+    saveState();
+    buildUnitsEditor();
+    buildWlLabelsEditor();
+    alert('✓ Settings reset to defaults.');
+  }
+}
+
+</script>
+</body>
+</html>

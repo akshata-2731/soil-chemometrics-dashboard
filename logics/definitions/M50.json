@@ -1,0 +1,16 @@
+{
+    "id": "M50",
+    "name": "Mahalanobis Distance Prediction",
+    "type": "Mathematical",
+    "target": "All 12 Nutrients",
+    "features": "IP1, IP2, IP3",
+    "required_ips": [
+        "ip1",
+        "ip2",
+        "ip3"
+    ],
+    "calibration_required": false,
+    "calibration_source": "N/A",
+    "verification_status": "VERIFIED",
+    "formula": "Calculates Mahalanobis distance D = sqrt((x-u)^T * E^-1 * (x-u)) against pre-computed Low/Medium/High centroids and inverse covariance matrices. Selects nearest class and scales prediction along D."
+}

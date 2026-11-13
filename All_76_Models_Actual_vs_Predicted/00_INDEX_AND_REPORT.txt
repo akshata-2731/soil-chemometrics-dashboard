@@ -1,0 +1,30 @@
+================================================================================
+      ALL 76 ML MODELS — ACTUAL VS PREDICTED COMPREHENSIVE REPOSITORY           
+================================================================================
+
+Generated Date: 2026-10-29 13:29:24
+Total Models Evaluated: 76
+Total Soil Samples: 49
+Target Nutrients: OC, N, P, K, Ca, Mg, S, Fe, Mn, Cu, Zn, B
+
+FILES IN THIS FOLDER:
+1. 00_ALL_76_MODELS_MASTER_SUMMARY.xlsx -> Master workbook with Champions, Leaderboard & Comparisons
+2. {Model_Name}_Actual_vs_Predicted.xlsx -> Dedicated Excel file for each of the 76 models
+
+TOP 5 OVERALL MODELS BY AVERAGE ACCURACY:
+  #1 Model_31_FOD_GPR_Matern | Avg Acc: 68.32% | Pass Rate: 58.73%
+  #2 Model_33_airPLS_SVR_RBF | Avg Acc: 63.54% | Pass Rate: 52.83%
+  #3 Model_32_DWT_Quantile_Stacker | Avg Acc: 61.02% | Pass Rate: 49.89%
+  #4 Model_37_SpecMaster_TriHybrid | Avg Acc: 57.41% | Pass Rate: 42.86%
+  #5 Combo_01_Quad_PLSR_SVR_ET_Huber | Avg Acc: 53.5% | Pass Rate: 35.15%
+
+CHAMPION MODEL PER NUTRIENT:
+  * OC: Model_31_FOD_GPR_Matern (Accuracy: 78.71%, Pass Rate: 65.31%)
+  * N: Model_31_FOD_GPR_Matern (Accuracy: 88.19%, Pass Rate: 93.88%)
+  * Ca: Model_31_FOD_GPR_Matern (Accuracy: 55.02%, Pass Rate: 38.78%)
+  * Mg: Model_31_FOD_GPR_Matern (Accuracy: 72.16%, Pass Rate: 73.47%)
+  * Fe: Model_31_FOD_GPR_Matern (Accuracy: 57.66%, Pass Rate: 51.02%)
+  * Mn: Model_31_FOD_GPR_Matern (Accuracy: 75.95%, Pass Rate: 59.18%)
+  * Cu: B03_3D_ExtraTrees (Accuracy: 77.56%, Pass Rate: 69.39%)
+  * Zn: Model_31_FOD_GPR_Matern (Accuracy: 69.62%, Pass Rate: 57.14%)
+  * B: B03_3D_ExtraTrees (Accuracy: 52.01%, Pass Rate: 40.82%)

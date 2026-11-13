@@ -1,0 +1,12 @@
+{
+    "id": "M39",
+    "name": "Relative Ranking Pred",
+    "type": "Mathematical",
+    "target": "All 12 Nutrients",
+    "features": "Dynamic per NUTRIENT_CONFIG",
+    "required_ips": [],
+    "calibration_required": true,
+    "calibration_source": "calibration.json [target]",
+    "verification_status": "VERIFIED",
+    "formula": "Executes logic39_predict dynamically based on NUTRIENT_CONFIG indices."
+}

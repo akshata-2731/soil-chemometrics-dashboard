@@ -1,0 +1,16 @@
+{
+    "id": "M51",
+    "name": "SAM + SRI Classification",
+    "type": "Mathematical",
+    "target": "All 12 Nutrients",
+    "features": "SRI, SAM Angles",
+    "required_ips": [
+        "ip1",
+        "ip2",
+        "ip3"
+    ],
+    "calibration_required": false,
+    "calibration_source": "N/A",
+    "verification_status": "VERIFIED",
+    "formula": "Calculates SRI = (ip1*ip3)/ip2. Evaluates Spectral Angles (SAM) to centroids. Assigns class via decision tree. Scales linearly via SRI ranges."
+}
